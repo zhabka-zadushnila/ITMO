@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 class Main {
     private static final Logger logger = Logger.getLogger(Main.class.getName());
     public static void main(String[] args) {
-        int port = 5556;
+        int port = 52946;
 
         File logDir = new File("logs");
         if (!logDir.exists()) {

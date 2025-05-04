@@ -26,7 +26,7 @@ public class PrintFieldDescendingTypeCommand extends BasicCommand{
     public String execute(Object args){
         return this.collectionManager.getCollection().values().stream()
                 .sorted(new TypeComparator())
-                .map((dragon) -> dragon.getId() + " : " + dragon.getType().toString())
+                .map((dragon) -> dragon.getId() + " : " + dragon.getType().toString() + "\n")
                 .collect(Collectors.joining());
     }
 }

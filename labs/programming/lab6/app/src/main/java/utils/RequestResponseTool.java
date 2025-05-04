@@ -33,7 +33,6 @@ public class RequestResponseTool {
             ByteBuffer lengthBuffer = ByteBuffer.allocate(4);
             while (lengthBuffer.hasRemaining()) {
                 if (channel.read(lengthBuffer) == -1) {
-                    System.out.println("Connection interrupted");
                     return null;
                 }
             }
@@ -61,7 +60,6 @@ public class RequestResponseTool {
                 throw new WrongRequestException();
             }
         } catch (IOException e) {
-            e.printStackTrace();
             System.out.println("Input/output error: " + e.getMessage());
         } catch (ClassNotFoundException e) {
             System.out.println("Received corrupted or unknown object: " + e.getMessage());

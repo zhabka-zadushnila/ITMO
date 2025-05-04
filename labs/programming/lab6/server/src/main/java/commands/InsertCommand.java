@@ -30,9 +30,12 @@ public class InsertCommand extends BasicCommand{
         }
 
         Map.Entry<String, Dragon> entry = (Map.Entry<String, Dragon>) arguments;
+        Dragon dragon = entry.getValue();
         if(entry.getValue() == null){
             return "";
         }
+        dragon.setId(Dragon.getIdCreator());
+        Dragon.setIdCreator(Dragon.getIdCreator() +1);
         if(collectionManager.hasElement(entry.getKey())) {
             return "such element already exists, nothing changed";
         }else{

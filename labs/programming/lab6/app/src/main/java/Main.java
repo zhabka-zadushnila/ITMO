@@ -40,7 +40,7 @@ class Main {
         BufferedReader in = new BufferedReader(new  InputStreamReader(System.in));
         Iterator<String> it = in.lines().iterator();
 
-        ClientManager clientManager = new ClientManager(it ,"localhost", 5556, commandManager);
+        ClientManager clientManager = new ClientManager(it ,"localhost", 52946, commandManager);
 
         clientManager.run();
     /*

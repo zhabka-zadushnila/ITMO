@@ -40,6 +40,6 @@ public class RemoveGreaterKeyCommand extends BasicCommand{
         int deleted = keysToDelete.size();
 
         collectionManager.setCollection(newCollection);
-        return String.format("Deleted" + deleted + "objects ^_^");
+        return String.format("Deleted " + deleted + " objects ^_^");
     }
 }

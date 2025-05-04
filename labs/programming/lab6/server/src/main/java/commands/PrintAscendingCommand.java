@@ -22,9 +22,9 @@ public class PrintAscendingCommand extends BasicCommand{
      */
     @Override
     public String execute(Object args) {
-        return this.collectionManager.getCollection().values().stream()
-                .sorted()
-                .map((dragon) -> dragon.toString().replaceAll("\n", "\n\t") + "\n")
+        return this.collectionManager.getCollection().entrySet().stream()
+                .sorted(Comparator.comparing(Map.Entry::getValue))
+                .map((entry) -> "Key (" + entry.getKey() + "):\n\t" + entry.getValue().toString().replaceAll("\n", "\n\t") + "\n")
                 .collect(Collectors.joining());
     }
 }

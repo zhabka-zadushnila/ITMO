@@ -11,6 +11,7 @@ import utils.RequestResponseTool;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -46,10 +47,12 @@ public class ClientManager {
 
 
     public void run(){
-        try (SocketChannel channel = connectToServer()){
-            handleConnection(channel);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        while(true) {
+            try (SocketChannel channel = ConnectionManager.connectToServer(hostname, port, MAX_RECONNECT_ATTEMPTS, RECONNECT_TIMEOUT)) {
+                handleConnection(channel);
+            } catch (IOException e) {
+                System.out.println("Похоже произошёл дисконнект. Переподключаемся. (после подключения введите команду снова)");
+            }
         }
     }
 
@@ -62,8 +65,8 @@ public class ClientManager {
                     readOperation(socketChannel);
                 }
             } catch (IOException e){
-                System.out.println("Похоже произошёл лёгкий дисконнект. Перезапустимся.");
-                socketChannel = connectToServer();
+                System.out.println("Похоже произошёл дисконнект. Переподключаемся.");
+                socketChannel = ConnectionManager.connectToServer(hostname, port, MAX_RECONNECT_ATTEMPTS, RECONNECT_TIMEOUT);
             }
         }
     }
@@ -71,31 +74,27 @@ public class ClientManager {
 
     private void handleConnection(SocketChannel channel) throws IOException {
         while (channel.isConnected()) {
-            try{
-                writeOperation(channel);
-                readOperation(channel);
-            } catch (IOException e){
-                System.out.println("Похоже произошёл лёгкий дисконнект. Перезапустимся.");
-                channel = connectToServer();
-            }
+            writeOperation(channel);
+            readOperation(channel);
+
         }
     }
 
 
-    private void readOperation(SocketChannel channel) {
+    private void readOperation(SocketChannel channel) throws IOException {
         //System.out.println("read is awaited");
         try {
             Request request = RequestResponseTool.getRequest(channel);
             if(request == null){
-                return;
+                throw new IOException("Server closed the connection");
             }
             if(request.isText()){
                 System.out.println(request.getText());
             }else{
                 System.out.println("Request can not be processed for now");
             }
-        }catch (WrongRequestException e){
-            System.out.println(e);
+        } catch (CustomException e){
+            System.out.println(e.toString());
         }
 
     }
@@ -127,9 +126,7 @@ public class ClientManager {
                     if (commandManager.isLocalCommand(command)) {
                         commandManager.getCommand(command).execute(args);
                     } else {
-                        // Ход достойный гения (одновременно очень грязный и невероятно чистый)
                         Request request = RequestConstructor.createRequest(commandManager.getCommand(command), args, commandManager.getCommand(command).execute(args));
-                        // System.out.println("request ready to send");
                         RequestResponseTool.sendRequest(channel, request);
                         requestSent = true;
                     }
@@ -147,32 +144,6 @@ public class ClientManager {
         }
         //System.out.println("Waiting for response");
     }
-/*
-    private void fileHandle(SocketChannel channel) throws IOException {
-        Selector selector = Selector.open();
-        channel.register(selector, SelectionKey.OP_WRITE);
-
-        while (channel.isConnected() && it.hasNext()){
-            selector.select();
-            Iterator<SelectionKey> keys = selector.selectedKeys().iterator();
-
-            while(keys.hasNext()){
-                SelectionKey key = keys.next();
-                keys.remove();
-
-                if (key.isWritable()){
-                    fileWriteOperation(channel, key);
-
-                }
-                if (key.isReadable()){
-                    readOperation(channel);
-                }
-            }
-
-        }
-
-    }
-*/
 
     private boolean fileWriteOperation(SocketChannel channel) throws IOException {
         String line;
@@ -193,7 +164,6 @@ public class ClientManager {
                     continue;
                 }
 
-                System.out.println(Arrays.toString(list));
                 command = list[0];
                 args = list.length > 1 ? Arrays.copyOfRange(list, 1, list.length) : new String[0];
 
@@ -201,7 +171,6 @@ public class ClientManager {
                     if (commandManager.isLocalCommand(command)) {
                         commandManager.getCommand(command).execute(args);
                     } else {
-                        // Ход достойный гения (одновременно очень грязный и невероятно чистый)
                         Request request = RequestConstructor.createRequest(commandManager.getCommand(command), args, commandManager.getCommand(command).execute(args));
                         RequestResponseTool.sendRequest(channel, request);
                         requestSent = true;
@@ -221,29 +190,7 @@ public class ClientManager {
     }
 
 
-    private SocketChannel connectToServer(){
-        for (int i =0; i < MAX_RECONNECT_ATTEMPTS; i++) {
-            try {
-                SocketChannel channel = SocketChannel.open(new InetSocketAddress(hostname, port));
-                channel.configureBlocking(false);
-                this.socketChannel = channel;
-                System.out.println("Соединение установлено");
-                return channel;
 
-            }catch (IOException e){
-                System.out.println("Соединение устанавливается. Попытка №" +(i+1) + "/5");
-                try {
-                    sleep(RECONNECT_TIMEOUT);
-                } catch (InterruptedException ex) {
-                    throw new RuntimeException(ex);
-                }
-
-            }
-        }
-        System.out.println("Соединение не установилось спустя 5 попыток. Обрываемся.");
-        System.exit(1);
-        return null;
-    }
 
     public Iterator<String> getInputIterator() {
         return it;

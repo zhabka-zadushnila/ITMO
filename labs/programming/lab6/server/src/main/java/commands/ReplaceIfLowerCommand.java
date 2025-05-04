@@ -7,6 +7,8 @@ import managers.CollectionManager;
 import managers.CommandManager;
 import managers.DragonCreationManager;
 
+import java.util.Map;
+
 
 /**
  * Replaces all the elements that are lower
@@ -22,22 +24,22 @@ public class ReplaceIfLowerCommand extends BasicCommand{
 
     @Override
     public String execute(Object arguments) throws NullArgsForbiddenException, NoSuchElementException {
-        String[] args = (String[]) arguments;
-        if (args.length == 0) {
-            throw new NullArgsForbiddenException();
+        if (arguments == null){
+            return "Something strange, seems like you've provided null";
+        }
+        Map.Entry<String, Dragon> entry = (Map.Entry<String, Dragon>) arguments;
+        Dragon dragon = entry.getValue();
+        if (dragon == null){
+            return "";
         }
 
-        if (args[0].trim().isBlank()) {
-            throw new NullArgsForbiddenException();
-        }
-        String inputId = args[0];
-        if(collectionManager.hasElement(inputId)){
-            Dragon dragon = DragonCreationManager.inputDragon(commandManager.getCommandInterpreter().getInputIterator());
-            if (dragon == null){
-                return "";
-            }
-            if(collectionManager.getElement(inputId).compareTo(dragon) < 0) {
-                collectionManager.replaceElement(inputId, dragon);
+
+        if(collectionManager.hasElement(entry.getKey())){
+
+            if(collectionManager.getElement(entry.getKey()).compareTo(dragon) < 0) {
+                dragon.setId(Dragon.getIdCreator());
+                Dragon.setIdCreator(Dragon.getIdCreator() +1);
+                collectionManager.replaceElement(entry.getKey(), dragon);
             }
             else{
                 return ("New dragon is not less than new one, nothing has changed :)");

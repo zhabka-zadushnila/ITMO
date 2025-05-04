@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.Iterator;
 import java.util.logging.Logger;
@@ -48,9 +49,31 @@ public class ConnectionManager {
                     if (key.isAcceptable()) {
                         ServerSocketChannel server = (ServerSocketChannel) key.channel();
                         SocketChannel client = server.accept();
-                        client.configureBlocking(false);
-                        client.register(selector, SelectionKey.OP_READ);
-                        logger.info("New client registered");
+                        client.configureBlocking(true);
+                        ByteBuffer buffer = ByteBuffer.allocate(1);
+                        int bytesRead = client.read(buffer);
+                        if (bytesRead == -1) {
+                            System.out.println("Client disconnected before sending message.");
+                            client.close();
+                            continue;
+                        }
+
+                        if (bytesRead != 1){
+                            System.out.println("Strange client hello accepted (" + String.valueOf(bytesRead) + " bytes)");
+                            logger.info("Strange client hello accepted");
+
+                            continue;
+                        }
+                        buffer.flip();
+                        if(buffer.get() == 0x42){
+                            buffer.clear();
+                            buffer.put((byte) 0x43);
+                            buffer.flip();
+                            client.write(buffer);
+                            client.configureBlocking(false);
+                            client.register(selector, SelectionKey.OP_READ);
+                            logger.info("New client registered");                       }
+
                     }
                     if (key.isReadable()) {
                         logger.info("Client sended request.");

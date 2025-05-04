@@ -30,10 +30,12 @@ public class UpdateCommand extends BasicCommand{
             if (entry.getValue() == null){
                 return "Got null, nothing changes";
             }
-            collectionManager.replaceElement(entry.getKey(), entry.getValue());
+            Dragon dragon = entry.getValue();
+            dragon.setId(collectionManager.getElement(entry.getKey()).getId());
+            collectionManager.replaceElement(entry.getKey(), dragon);
+            return "element " + entry.getKey() + " was replaced successfully";
         }else{
             return new NoSuchElementException().toString();
         }
-        return "";
     }
 }
