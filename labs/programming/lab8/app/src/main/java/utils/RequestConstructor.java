@@ -1,10 +1,10 @@
 package utils;
 
-import classes.Dragon;
 import commands.BasicCommand;
 import structs.Packet;
 import structs.PacketType;
 import structs.User;
+import structs.classes.Dragon;
 
 public class RequestConstructor {
 

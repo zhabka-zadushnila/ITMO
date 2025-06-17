@@ -7,6 +7,6 @@ public class AppStarter {
         // Application.launch() is the official way to start a JavaFX application.
         // It sets up the JavaFX toolkit and calls the start() method
         // of the class you provide (LoginScreen in this case).
-        Application.launch(LoginScreen.class, args);
+        Application.launch(DragonTableView.class, args);
     }
 }

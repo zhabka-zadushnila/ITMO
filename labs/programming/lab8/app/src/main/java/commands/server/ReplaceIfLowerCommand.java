@@ -1,12 +1,12 @@
 package commands.server;
 
-import classes.Dragon;
 import commands.BasicCommand;
 import exceptions.NoSuchElementException;
 import exceptions.NullArgsForbiddenException;
 import managers.CollectionManager;
 import managers.CommandManager;
 import managers.DragonCreationManager;
+import structs.classes.Dragon;
 
 
 /**
@@ -14,7 +14,8 @@ import managers.DragonCreationManager;
  */
 public class ReplaceIfLowerCommand extends BasicCommand {
     CommandManager commandManager;
-    public ReplaceIfLowerCommand(CollectionManager collectionManager, CommandManager commandManager){
+
+    public ReplaceIfLowerCommand(CollectionManager collectionManager, CommandManager commandManager) {
         super("replace_if_lowe", "replace_if_lowe null {element} : заменить значение по ключу, если новое значение меньше старого", collectionManager);
         this.commandManager = commandManager;
     }
@@ -22,9 +23,10 @@ public class ReplaceIfLowerCommand extends BasicCommand {
 
     /**
      * Uses basic {@link CollectionManager}
+     *
      * @param args - an array of strings (words that were separated by spaces). Usually it is ignored in commands that do not need any args, and those who need, get only as much as they need (others are being ignored)
      * @throws NullArgsForbiddenException - basically do not give empty input
-     * @throws NoSuchElementException - basically didn't find an element
+     * @throws NoSuchElementException     - basically didn't find an element
      */
     @Override
     public Object execute(String[] args) throws NullArgsForbiddenException, NoSuchElementException {

@@ -1,7 +1,6 @@
 package utils;
 
-import classes.Dragon;
-import classes.DragonType;
+import structs.classes.Dragon;
 
 import java.util.Comparator;
 
