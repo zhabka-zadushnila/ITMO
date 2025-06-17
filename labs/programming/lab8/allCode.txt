@@ -1,0 +1,1849 @@
+
+// src/main/java/utils/TypeComparator.java
+package utils;
+
+import classes.Dragon;
+import classes.DragonType;
+
+import java.util.Comparator;
+
+/**
+ * Simple comparator that is used for default sort method in arrays.
+ */
+public class TypeComparator implements Comparator<Dragon> {
+    @Override
+    public int compare(Dragon d1, Dragon d2) {
+        return d1.getType().compareTo(d2.getType());
+    }
+}
+// src/main/java/utils/InputChecker.java
+package utils;
+
+import exceptions.*;
+import exceptions.RangeExceededException;
+
+import java.math.BigDecimal;
+
+/**
+ * Class that is used just to check user's input
+ */
+public class InputChecker {
+    /**
+     * Checks if string is blank
+     * @param input String
+     * @return String if it is fine
+     * @throws NullForbiddenException if String is not fine.
+     */
+    static public String inputNonNullChecker(String input) throws NullForbiddenException {
+        if(input.trim().isBlank()){
+            throw new NullForbiddenException();
+        }
+        else{
+            return input;
+        }
+    }
+
+    /**
+     * MAGNUM OPUS <br>
+     * MEME ITSELF <br>
+     * PIECE OF ART (no)
+     * @param input String
+     * @param min min value (might be null for <em>-inf</em>)
+     * @param max max value (might be null for <i>+inf</i>)
+     * @param nonNull boolean parameter to check number for null
+     * @param returnType Class which has to be returned
+     * @return returns object of class according to returnType
+     * @throws NullForbiddenException cause null is bad
+     * @throws RangeExceededException cause getting out of limits is halal
+     */
+    static public <T extends Number> T inputRangeChecker(String input, Double min, Double max, boolean nonNull, Class<T> returnType) throws NullForbiddenException, RangeExceededException {
+        if(nonNull){
+            if(input.trim().isBlank()){throw new NullForbiddenException();}
+        }
+
+        if(input.trim().isBlank()){return null;}
+
+        BigDecimal inputValue = new BigDecimal(input);
+
+        if (min != null && inputValue.compareTo(new BigDecimal(min)) < 0) {
+            throw new RangeExceededException(min, max);
+        }
+
+        if (max != null && inputValue.compareTo(new BigDecimal(max)) > 0) {
+            throw new RangeExceededException(min, max);
+        }
+
+        if(returnType == Integer.class){
+            return returnType.cast(inputValue.intValue());
+        }
+        if(returnType == Double.class){
+            return returnType.cast(inputValue.doubleValue());
+        }
+        if(returnType == Float.class){
+            return returnType.cast(inputValue.floatValue());
+        }
+        if(returnType == Long.class){
+            return returnType.cast(inputValue.longValue());
+        }
+        return null;
+    }
+
+    /**
+     * Method that is used to pick enum, works in any way
+     * @param input String
+     * @param enumClass Generic. Put here Enum that you want
+     * @return returns enum if it was picked correctly
+     */
+    public static <E extends Enum<E>> E getEnum(String input, Class<E> enumClass) {
+        try {
+            return Enum.valueOf(enumClass, input.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new NoSuchElementException();
+        }
+    }
+}
+// src/main/java/commands/RemoveKeyCommand.java
+package commands;
+
+import exceptions.NoSuchElementException;
+import exceptions.NullArgsForbiddenException;
+import managers.CollectionManager;
+
+
+/**
+ * Removes element by key. That's all
+ */
+public class RemoveKeyCommand extends BasicCommand{
+    public RemoveKeyCommand(CollectionManager collectionManager){
+        super("remove_key", "remove_key null : удалить элемент из коллекции по его ключу", collectionManager);
+    }
+
+    /**
+     * Deletes it via {@link managers.CommandManager}
+     * @param args an array of strings (words that were separated by spaces). Usually it is ignored in commands that do not need any args, and those who need, get only as much as they need (others are being ignored)
+     * @throws NullArgsForbiddenException doesn't like when input is blank.
+     * @throws NoSuchElementException thrown when no such element was found in collection.
+     */
+    @Override
+    public void execute(String[] args) throws NullArgsForbiddenException, NoSuchElementException {
+        int deleted = 0;
+        if (args.length == 0) {
+            throw new NullArgsForbiddenException();
+        }
+
+        if (args[0].trim().isBlank()) {
+            throw new NullArgsForbiddenException();
+        }
+
+        String masterId = args[0];
+
+        if(collectionManager.hasElement(masterId)){
+            collectionManager.killElement(masterId);
+            System.out.println("Элемент " + masterId + " удалён успешно.");
+        }else{
+            throw new NoSuchElementException();
+        }
+    }
+
+}
+// src/main/java/commands/RemoveGreaterKeyCommand.java
+package commands;
+
+import classes.Dragon;
+import exceptions.NullArgsForbiddenException;
+import managers.CollectionManager;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Removes elements with key greater than this one
+ */
+public class RemoveGreaterKeyCommand extends BasicCommand{
+    public RemoveGreaterKeyCommand(CollectionManager collectionManager){
+        super("remove_greater_key", "remove_greater_key null : удалить из коллекции все элементы, ключ которых превышает заданный", collectionManager);
+    }
+
+
+    @Override
+    public void execute(String[] args) throws NullArgsForbiddenException {
+        int deleted = 0;
+
+        if(args.length == 0){
+            throw new NullArgsForbiddenException();
+        }
+
+        if (args[0].trim().isBlank()) {
+            throw new NullArgsForbiddenException();
+        }
+
+        String masterId = args[0];
+        Map<String, Dragon> originalCollection = collectionManager.getCollection();
+        Map<String, Dragon> newCollection = new HashMap<String, Dragon>(originalCollection);
+        for(String comparableElement : collectionManager.getCollection().keySet()){
+            if(masterId.equals(comparableElement)){
+                continue;
+            }
+            if(masterId.compareTo(comparableElement) > 0){
+                newCollection.remove(comparableElement);
+                deleted++;
+            }
+        }
+        collectionManager.setCollection(newCollection);
+        System.out.println("Deleted " + deleted + " objects ^_^");
+    }
+}
+// src/main/java/commands/RemoveGreaterCommand.java
+package commands;
+
+import classes.Dragon;
+import exceptions.NullArgsForbiddenException;
+import managers.CollectionManager;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Removes greater elements (gets initial element by id)
+ */
+public class RemoveGreaterCommand extends  BasicCommand{
+    public RemoveGreaterCommand(CollectionManager collectionManager){
+        super("remove_greater", "remove_greater {element} : удалить из коллекции все элементы, превышающие заданный", collectionManager);
+    }
+
+    /**
+     * Uses its {@link CollectionManager} and would remind me of <b>RUST SUPREMACY</b> till the end of my life.
+     * @param args an array of strings (words that were separated by spaces). Usually it is ignored in commands that do not need any args, and those who need, get only as much as they need (others are being ignored)
+     * @throws NullArgsForbiddenException thrown when no args were provided.
+     */
+    @Override
+    public void execute(String[] args) throws NullArgsForbiddenException {
+        int deleted = 0;
+        if(args.length == 0){
+            throw new NullArgsForbiddenException();
+        }
+        if (args[0].trim().isBlank()) {
+            throw new NullArgsForbiddenException();
+        }
+
+        String input = args[0];
+        Dragon masterElement = collectionManager.getElement(input);
+
+
+        if(masterElement == null){
+            System.out.println("Такого элемента нет");
+            return;
+        }
+        Map<String, Dragon> originalCollection = collectionManager.getCollection();
+        Map<String, Dragon> newCollection = new HashMap<String, Dragon>(originalCollection);
+        for(Map.Entry<String, Dragon> comparableElement : originalCollection.entrySet()){
+            if(masterElement.equals(comparableElement.getValue())){
+                continue;
+            }
+            if(masterElement.compareTo(comparableElement.getValue()) > 0){
+                newCollection.remove(comparableElement.getKey());
+                deleted++;
+            }
+        }
+        collectionManager.setCollection(newCollection);
+        System.out.println("Deleted " + deleted + " objects ^_^");
+    }
+}
+// src/main/java/commands/ShowCommand.java
+package commands;
+
+import classes.Dragon;
+import managers.CollectionManager;
+
+import java.util.Map;
+
+/**
+ * Shows the collection
+ */
+public class ShowCommand extends BasicCommand{
+    public ShowCommand(CollectionManager collectionManager) {
+        super("show", "show : вывести в стандартный поток вывода все элементы коллекции в строковом представлении", collectionManager);
+    }
+
+    /**
+     * Uses its {@link CollectionManager} to access map.
+     * @param args - an array of strings (words that were separated by spaces). Usually it is ignored in commands that do not need any args, and those who need, get only as much as they need (others are being ignored)
+     */
+    @Override
+    public void execute(String[] args){
+        Map<String, Dragon> localMap = this.collectionManager.getCollection();
+        for (var pair: localMap.entrySet()){
+            System.out.println("Key (" + pair.getKey() +")" + ":");
+            System.out.println("\t" + pair.getValue().toString().replaceAll("\n", "\n\t") + "\n");
+
+        }
+    }
+}
+// src/main/java/commands/PrintFieldDescendingTypeCommand.java
+package commands;
+
+import classes.Dragon;
+import managers.CollectionManager;
+import utils.TypeComparator;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Outputs id : type
+ */
+
+public class PrintFieldDescendingTypeCommand extends BasicCommand{
+    public PrintFieldDescendingTypeCommand(CollectionManager collectionManager) {
+        super("print_field_descending_type", "print_field_descending_type : вывести значения поля type всех элементов в порядке убывания", collectionManager);
+    }
+
+    /**
+     * Uses default List sort({@link TypeComparator})
+     * @param args - an array of strings (words that were separated by spaces). Usually it is ignored in commands that do not need any args, and those who need, get only as much as they need (others are being ignored)
+     */
+    @Override
+    public void execute(String[] args){
+        List<Dragon> localList = new ArrayList<Dragon>(this.collectionManager.getCollection().values());
+        localList.sort(new TypeComparator());
+        for (var dragon: localList){
+            System.out.println(dragon.getId() + " : " + dragon.getType().toString());
+
+        }
+    }
+}
+// src/main/java/commands/PrintAscendingCommand.java
+package commands;
+
+import classes.Dragon;
+import managers.CollectionManager;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+
+/**
+ * Outputs all the elements stored in its {@link CollectionManager} in ascending order
+ */
+public class PrintAscendingCommand extends BasicCommand{
+    public PrintAscendingCommand(CollectionManager collectionManager) {
+        super("print_ascending","print_ascending : вывести элементы коллекции в порядке возрастания", collectionManager);
+    }
+
+
+    /**
+     * Uses basic {@link List} sort(null) method.
+     * @param args - an array of strings (words that were separated by spaces). Usually it is ignored in commands that do not need any args, and those who need, get only as much as they need (others are being ignored)
+     */
+    @Override
+    public void execute(String[] args) {
+        List<Dragon> localList = new ArrayList<Dragon>(this.collectionManager.getCollection().values());
+        localList.sort(null);
+        for (var dragon: localList){
+
+            System.out.println(dragon.toString().replaceAll("\n", "\n\t") + "\n");
+
+        }
+    }
+}
+// src/main/java/commands/HelpCommand.java
+package commands;
+
+import managers.CommandManager;
+
+/**
+ * Command that outputs name and description for all the commands in its {@link CommandManager}.
+ */
+public class HelpCommand extends BasicCommand {
+    CommandManager commandManager;
+
+    public HelpCommand(CommandManager commandManager){
+        super("help", "help : вывести справку по доступным командам");
+        this.commandManager = commandManager;
+    }
+
+    /**
+     * Gets all the commands that were registered in its {@link CommandManager}.
+     * @param args - an array of strings (words that were separated by spaces). Usually it is ignored in commands that do not need any args, and those who need, get only as much as they need (others are being ignored)
+     */
+
+    @Override
+    public void execute(String[] args) {
+        for(var command : commandManager.getCommandsMap().entrySet()){
+            System.out.println("  - " + command.getValue().getDescription());
+        }
+    }
+}
+// src/main/java/commands/SaveCommand.java
+package commands;
+
+
+import exceptions.NullArgsForbiddenException;
+import managers.CollectionManager;
+import managers.FileManager;
+
+/**
+ * Used to save something to file.
+ */
+public class SaveCommand extends BasicCommand{
+    public SaveCommand(CollectionManager collectionManager){
+        super("save", "save : сохранить коллекцию в файл", collectionManager);
+    }
+
+
+    /**
+     * fun fact - all the errors are getting catched in {@link FileManager}.
+     * @param args - an array of strings (words that were separated by spaces). Usually it is ignored in commands that do not need any args, and those who need, get only as much as they need (others are being ignored)
+     * @throws NullArgsForbiddenException thrown when no args were provided.
+     */
+    @Override
+    public void execute(String[] args) throws NullArgsForbiddenException {
+
+        if (args.length == 0) {
+            throw new NullArgsForbiddenException();
+        }
+
+        if (args[0].trim().isBlank()) {
+            throw new NullArgsForbiddenException();
+        }
+
+        FileManager.saveCollectionToFile(args[0], collectionManager.getCollection());
+
+    }
+
+
+}
+// src/main/java/commands/CountLessThanCharacterCommand.java
+package commands;
+
+import classes.Dragon;
+import classes.DragonCharacter;
+import exceptions.NullArgsForbiddenException;
+import managers.CollectionManager;
+import utils.InputChecker;
+
+import java.util.Map;
+
+/**
+ * Outputs amount of elements in which character field contains value less than given
+ */
+public class CountLessThanCharacterCommand extends BasicCommand {
+    public CountLessThanCharacterCommand(CollectionManager collectionManager){
+        super("count_less_than_character", "count_less_than_character character : вывести количество элементов, значение поля character которых меньше заданного", collectionManager);
+        }
+
+    /**
+     * Checks your input with {@link InputChecker}, goes through an entrySet and outputs a number.
+     * @param args an array of strings (words that were separated by spaces). Usually it is ignored in commands that do not need any args, and those who need, get only as much as they need (others are being ignored)
+     * @throws NullArgsForbiddenException thrown when no args were given when needed.
+     * @throws IllegalArgumentException thrown if such character enum type does not exist. Check {@link DragonCharacter}
+     */
+    @Override
+    public void execute(String[] args) throws NullArgsForbiddenException, IllegalArgumentException {
+
+        if(args.length == 0){
+            throw new NullArgsForbiddenException();
+        }
+        if (args[0].trim().isBlank()) {
+            throw new NullArgsForbiddenException();
+        }
+
+
+        DragonCharacter character = InputChecker.getEnum(args[0], DragonCharacter.class);
+
+        int amount = 0;
+        Map<String, Dragon> map = collectionManager.getCollection();
+        for(var entry : map.entrySet()){
+            if(entry.getValue().getCharacter().compareTo(character) < 0){
+                amount++;
+            }
+        }
+        System.out.println(amount);
+    }
+
+}
+// src/main/java/commands/ClearCommand.java
+package commands;
+
+import managers.CollectionManager;
+
+/**
+ * Command to clear the collection.
+ */
+public class ClearCommand extends BasicCommand {
+    public ClearCommand(CollectionManager collectionManager){
+        super("clear", "clear : очистить коллекцию", collectionManager);
+    }
+
+    /**
+     * Basically executes {@link CollectionManager} method in its {@link CollectionManager}.
+     * @param args - an array of strings (words that were separated by spaces). Usually it is ignored in commands that do not need any args, and those who need, get only as much as they need (others are being ignored)
+     */
+    @Override
+    public void execute(String[] args){
+        collectionManager.clearCollection();
+        System.out.println("Collection was cleared successfully!");
+    }
+
+}
+// src/main/java/commands/ReplaceIfLowerCommand.java
+package commands;
+
+import classes.Dragon;
+import exceptions.NoSuchElementException;
+import exceptions.NullArgsForbiddenException;
+import managers.CollectionManager;
+import managers.CommandManager;
+import managers.DragonCreationManager;
+
+
+/**
+ * Replaces all the elements that are lower
+ */
+public class ReplaceIfLowerCommand extends BasicCommand{
+    CommandManager commandManager;
+    public ReplaceIfLowerCommand(CollectionManager collectionManager, CommandManager commandManager){
+        super("replace_if_lowe", "replace_if_lowe null {element} : заменить значение по ключу, если новое значение меньше старого", collectionManager);
+        this.commandManager = commandManager;
+    }
+
+
+    /**
+     * Uses basic {@link CollectionManager}
+     * @param args - an array of strings (words that were separated by spaces). Usually it is ignored in commands that do not need any args, and those who need, get only as much as they need (others are being ignored)
+     * @throws NullArgsForbiddenException - basically do not give empty input
+     * @throws NoSuchElementException - basically didn't find an element
+     */
+    @Override
+    public void execute(String[] args) throws NullArgsForbiddenException, NoSuchElementException {
+        if (args.length == 0) {
+            throw new NullArgsForbiddenException();
+        }
+
+        if (args[0].trim().isBlank()) {
+            throw new NullArgsForbiddenException();
+        }
+        String inputId = args[0];
+        if(collectionManager.hasElement(inputId)){
+            Dragon dragon = DragonCreationManager.inputDragon(commandManager.getCommandInterpreter().getInputIterator());
+            if (dragon == null){
+                return;
+            }
+            if(collectionManager.getElement(inputId).compareTo(dragon) < 0) {
+                collectionManager.replaceElement(inputId, dragon);
+            }
+            else{
+                System.out.println("New dragon is not less than new one, nothing has changed :)");
+            }
+        }else{
+            throw new NoSuchElementException();
+        }
+    }
+}
+// src/main/java/commands/UpdateCommand.java
+package commands;
+
+import classes.Dragon;
+import exceptions.NoSuchElementException;
+import exceptions.NullArgsForbiddenException;
+import managers.CollectionManager;
+import managers.CommandManager;
+import managers.DragonCreationManager;
+
+/**
+ * Used for updating element with specific id
+ */
+public class UpdateCommand extends BasicCommand{
+    CommandManager commandManager;
+    public UpdateCommand(CollectionManager collectionManager, CommandManager commandManager){
+        super("update", "update id {element} : обновить значение элемента коллекции, id которого равен заданному", collectionManager);
+        this.commandManager = commandManager;
+    }
+
+
+    /**
+     * Uses both {@link CommandManager} to get iterator and {@link CollectionManager} for access to db
+     * @param args - an array of strings (words that were separated by spaces). Usually it is ignored in commands that do not need any args, and those who need, get only as much as they need (others are being ignored)
+     * @throws NullArgsForbiddenException - we hate it when you don't know what to put in command
+     * @throws NoSuchElementException - we hate it when you put some crap in command
+     */
+
+    @Override
+    public void execute(String[] args) throws NullArgsForbiddenException, NoSuchElementException {
+        if (args.length == 0) {
+            throw new NullArgsForbiddenException();
+        }
+
+        if (args[0].trim().isBlank()) {
+            throw new NullArgsForbiddenException();
+        }
+
+        String inputId = args[0];
+        if(collectionManager.hasElement(inputId)){
+            Dragon dragon = DragonCreationManager.inputDragon(commandManager.getCommandInterpreter().getInputIterator());
+            if (dragon == null){
+                return;
+            }
+            collectionManager.replaceElement(inputId, dragon);
+        }else{
+            throw new NoSuchElementException();
+        }
+    }
+}
+// src/main/java/commands/InsertCommand.java
+package commands;
+
+import Interpreters.CommandInterpreter;
+import classes.Dragon;
+import exceptions.NullArgsForbiddenException;
+import managers.CollectionManager;
+import managers.CommandManager;
+import managers.DragonCreationManager;
+
+import java.util.Arrays;
+
+/**
+ * Command that is used for adding some stuff in collection. Operates with both {@link CommandManager} and {@link CollectionManager}.
+ */
+
+public class InsertCommand extends BasicCommand{
+    CommandManager commandManager;
+    public InsertCommand(CollectionManager collectionManager, CommandManager commandManager){
+        super("insert", "insert null {element} : добавить новый элемент с заданным ключом", collectionManager);
+        this.commandManager = commandManager;
+    }
+
+
+    /**
+     * Uses specific {@link DragonCreationManager} and some Iterators magic <i>*being meguka is suffering*</i>
+     * @param args an array of strings (words that were separated by spaces). Usually it is ignored in commands that do not need any args, and those who need, get only as much as they need (others are being ignored)
+     * @throws NullArgsForbiddenException thrown when no args were provided.
+     */
+    @Override
+    public void execute(String[] args) throws NullArgsForbiddenException {
+
+        if(args.length == 0){
+            throw new NullArgsForbiddenException();
+        }
+        if (args[0].trim().isBlank()) {
+            throw new NullArgsForbiddenException();
+        }
+        String id = args[0];
+
+
+
+
+        if(collectionManager.hasElement(id)){
+            System.out.println("Element with such name exists already! If you will continue, it will be overwritten!\nContinue? [y/N]:");
+            String input = commandManager.getCommandInterpreter().getInputIterator().next();
+            if (input.trim().isBlank() || input.equalsIgnoreCase("n")){
+                return;
+            }
+        }
+
+        Dragon dragon = DragonCreationManager.inputDragon(commandManager.getCommandInterpreter().getInputIterator());
+        if(dragon == null){
+            return;
+        }
+        collectionManager.addElement(id, dragon);
+
+
+    }
+
+
+
+}
+// src/main/java/commands/InfoCommand.java
+package commands;
+
+import managers.CollectionManager;
+
+import java.util.Map;
+
+/**
+ * Command, that briefly takes basic info from the {@link CollectionManager} and ouputs it into console.
+ */
+
+public class InfoCommand extends  BasicCommand{
+
+    public InfoCommand(CollectionManager collectionManager){
+        super("info","info : вывести в стандартный поток вывода информацию о коллекции (тип, дата инициализации, количество элементов и т.д.)", collectionManager);
+    }
+
+    /**
+     * Collects info from {@link CollectionManager} and outputs it.
+     * @param args - an array of strings (words that were separated by spaces). Usually it is ignored in commands that do not need any args, and those who need, get only as much as they need (others are being ignored)
+     */
+    @Override
+    public void execute(String[] args){
+        Map<String, Object> map = collectionManager.getCollectionInfoMap();
+
+        System.out.println("Тип коллекции: " + map.get("Type").toString() + ".\n" +
+                "Дата инициализации коллекции: " + map.get("Date").toString() + ".\n"+
+                "Количество элементов в коллекции: " + map.get("ElementsQuantity").toString()
+        );
+    }
+}
+// src/main/java/commands/BasicCommand.java
+package commands;
+
+import exceptions.CustomException;
+import exceptions.InfiniteFileRecursion;
+import exceptions.NoSuchElementException;
+import exceptions.NullArgsForbiddenException;
+import managers.CollectionManager;
+import managers.CommandManager;
+
+import java.io.FileNotFoundException;
+
+/**
+ * Abstract class for all the commands. Contains exceptional name and description, execute() method.
+ *
+ */
+
+abstract public class BasicCommand {
+
+    private final String name;
+    private final String description;
+    protected CollectionManager collectionManager;
+    public BasicCommand(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
+    public BasicCommand(String name, String description, CollectionManager collectionManager){
+        this(name,description);
+        this.collectionManager = collectionManager;
+    }
+
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+
+
+
+    /**
+     * Execute function stands for basic command execution process. Execute method is being executed in CommandManager.
+      * @param args - an array of strings (words that were separated by spaces). Usually it is ignored in commands that do not need any args, and those who need, get only as much as they need (others are being ignored)
+     */
+    public void execute(String[] args) throws CustomException, FileNotFoundException {
+        System.out.println(this.name + " is not done yet. ^_^");
+
+    }
+}
+// src/main/java/commands/ExitCommand.java
+package commands;
+
+/**
+ * Some sort of wrapper for System.exit(0).
+ */
+
+public class ExitCommand extends BasicCommand{
+
+    public ExitCommand(){
+        super("exit", "exit : завершить программу (без сохранения в файл)");
+    }
+
+    /**
+     * {@link System} check out an exit method
+     * @param args - an array of strings (words that were separated by spaces). Usually it is ignored in commands that do not need any args, and those who need, get only as much as they need (others are being ignored)
+     */
+    @Override
+    public void execute(String[] args) {
+        System.exit(0);
+    }
+}// src/main/java/commands/ExecuteScriptCommand.java
+package commands;
+
+import Interpreters.CommandInterpreter;
+import exceptions.InfiniteFileRecursion;
+import exceptions.NullArgsForbiddenException;
+import managers.CollectionManager;
+import managers.CommandManager;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.HashSet;
+import java.util.Scanner;
+import java.util.Set;
+
+/**
+ * Command that is used to execute scripts.
+ */
+
+public class ExecuteScriptCommand extends BasicCommand{
+    CommandManager commandManager;
+    //place command manager in here
+
+    /**
+     * Its constructor gets {@link CommandManager}, that manages commands and contains {@link CommandInterpreter}
+     * @param commandManager - thing that manages commands, operates with them. Needed for some commands to access managers and stuff.
+     */
+
+    public ExecuteScriptCommand(CommandManager commandManager){
+        super("execute_script","execute_script file_name : считать и исполнить скрипт из указанного файла. В скрипте содержатся команды в таком же виде, в котором их вводит пользователь в интерактивном режиме.");
+        this.commandManager = commandManager;
+    }
+
+
+    /**
+     * In this command it basically checks if there's no recursion and starts new instance of {@link CommandInterpreter}, that gets things done
+     * @param args an array of strings (words that were separated by spaces). Usually it is ignored in commands that do not need any args, and those who need, get only as much as they need (others are being ignored)
+     * @throws InfiniteFileRecursion throws just in case if user lost his mind and tries to create infinite file recursion.
+     * @throws NullArgsForbiddenException thrown when no arguments were provided (they are exceptional).
+     */
+    @Override
+    public void execute(String[] args) throws InfiniteFileRecursion, NullArgsForbiddenException, FileNotFoundException {
+        if(args.length == 0){
+            throw new NullArgsForbiddenException();
+        }
+        if (args[0].trim().isBlank()) {
+            throw new NullArgsForbiddenException();
+        }
+
+
+        String filename = args[0];
+        if(commandManager.getCommandInterpreter().executedFile(filename)){
+            throw new InfiniteFileRecursion();
+        }
+        else{
+            Set<String> executableFiles = commandManager.getCommandInterpreter().getExecutableFiles();
+            executableFiles.add(filename);
+            Scanner sc = new Scanner(new File(filename)).useDelimiter("\n");
+            new CommandInterpreter(commandManager, sc, executableFiles).fileExecution();
+            executableFiles.remove(filename);
+
+        }
+    }
+
+
+}
+// src/main/java/exceptions/CustomException.java
+package exceptions;
+
+/**
+ * Class that is being caught by {@link Interpreters.CommandInterpreter}, use it to create new exceptions for your commands
+ */
+public abstract class CustomException extends RuntimeException {
+    public CustomException() {}
+
+    /**
+     * Any exception that is being caught during runtime will be displayed using toString().
+     * @return String that explains main idea of exception
+     */
+    public String toString(){
+        return "CustomException";
+    }
+}
+// src/main/java/exceptions/NullArgsForbiddenException.java
+package exceptions;
+
+/**
+ * Exception that is usually thrown by {@link utils.InputChecker}.
+ */
+public class NullArgsForbiddenException extends CustomException {
+    @Override
+    public String toString(){
+        return "Null obtained when command needs input!";
+    }
+}
+// src/main/java/exceptions/NullForbiddenException.java
+package exceptions;
+
+public class NullForbiddenException extends CustomException {
+    public NullForbiddenException() {
+    }
+
+    @Override
+    public String toString(){
+        return "Null obtained in non-null field!";
+    }
+
+}
+// src/main/java/exceptions/RangeExceededException.java
+package exceptions;
+
+
+/**
+ * Exception that you can use to remind user to use specific range of numbers
+ */
+public class RangeExceededException extends CustomException {//checked/unchecked
+    Double min;
+    Double max;
+
+    /**
+     * You have to set borders in constructor of this exception. If you need only one-side restriction, put null for +-inf.
+     * @param min Double (min num in range)
+     * @param max Double (max num in range)
+     */
+    public RangeExceededException(Double min, Double max) {
+        this.max = max;
+        this.min = min;
+    }
+
+    @Override
+    public String toString() {
+        if(min == null){
+            return "Expected range is less than " + max;
+        }
+        if(max == null){
+            return "Expected range is bigger than " + min;
+        }
+        return "Expected range is a number between " + min + " and " + max;
+    }
+}
+// src/main/java/exceptions/NoSuchColorException.java
+package exceptions;
+
+/**
+ * Exception that is being thrown when user tries to pick color that does not exist
+ */
+public class NoSuchColorException extends CustomException {
+
+  @Override
+  public String toString(){
+    return "Seems like there is no such color";
+  }
+}
+// src/main/java/exceptions/NoSuchElementException.java
+package exceptions;
+
+/**
+ * Exception that is being thrown when element was not found in collection
+ */
+public class NoSuchElementException extends CustomException {
+    @Override
+    public String toString(){
+        return "No such element in collection";
+    }
+}
+// src/main/java/exceptions/InfiniteFileRecursion.java
+package exceptions;
+
+
+/**
+ * Exception that is used to notify user when recursion occurs
+ */
+public class InfiniteFileRecursion extends CustomException {
+    @Override
+    public String toString(){
+        return "Seems like you are trying to create a file loop. Bruh, for what?";
+    }
+}
+// src/main/java/classes/Coordinates.java
+package classes;
+
+
+/**
+ * Dragon's coordinates
+ */
+public class Coordinates {
+    public double x;
+    public Long y; //Максимальное значение поля: 984, Поле не может быть null
+
+    public Coordinates(){
+    }
+    public Coordinates(double x, Long y){
+        this.x = x;
+        this.y = y;
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public Long getY() {
+        return y;
+    }
+
+    public void setY(Long y) {
+        this.y = y;
+    }
+
+    @Override
+    public String toString(){
+        return "(x: " + x + "; y: " + y + ")";
+    }
+}// src/main/java/classes/Dragon.java
+package classes;
+import java.time.LocalDate;
+
+/**
+ * Main object in our story.
+ */
+public class Dragon implements Comparable<Dragon> {
+    private static int idCreator = 0;
+    private int id; //Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
+    private String name; //Поле не может быть null, Строка не может быть пустой
+    private Coordinates coordinates; //Поле не может быть null
+    private java.time.LocalDate creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
+    private int age; //Значение поля должно быть больше 0
+    private Color color; //Поле не может быть null
+    private DragonType type; //Поле не может быть null
+    private DragonCharacter character; //Поле может быть null
+    private DragonCave cave; //Поле может быть null
+
+    public DragonType getType() {
+        return type;
+    }
+
+    public Dragon(){
+        this.id = ++idCreator;
+    }
+
+    public Dragon(String name, Coordinates coordinates, int age, Color color, DragonType type){
+        this.id = ++idCreator;
+        this.name = name;
+        this.coordinates = coordinates;
+        this.creationDate = java.time.LocalDate.now();
+        this.age = age;
+        this.color = color;
+        this.type = type;
+        this.character = null;
+        this.cave = null;
+    }
+
+    public Dragon(String name, Coordinates coordinates, int age, Color color, DragonType type, DragonCave cave) {
+        this(name, coordinates, age, color, type);
+        this.cave = cave;
+    }
+    public Dragon(String name, Coordinates coordinates, int age, Color color, DragonType type, DragonCharacter character) {
+        this(name, coordinates, age, color, type);
+        this.character = character;
+    }
+    public Dragon(String name, Coordinates coordinates, int age, Color color, DragonType type, DragonCharacter character, DragonCave cave) {
+        this(name, coordinates, age, color, type);
+        this.character = character;
+        this.cave = cave;
+    }
+
+    public DragonCharacter getCharacter() {
+        return character;
+    }
+
+    @Override
+    public String toString(){
+        String characterLocal= "null";
+        String caveLocal = "null";
+        if(this.character != null){
+            characterLocal = this.character.toString();
+        }
+        if(this.cave != null){
+            caveLocal = this.cave.toString();
+        }
+
+        return  "Id: " + id + "\n" +
+                "Name: " + this.name + "\n" +
+                "Coordinates: " + this.coordinates.toString() + "\n"+
+                "Creation date: " + this.creationDate.toString() + "\n"+
+                "Age: " + this.age + "\n"+
+                "Color: " + this.color.toString() + "\n" +
+                "Type: " + this.type.toString() + "\n" +
+                "Character: " + characterLocal + "\n"+
+                "Cave:" + caveLocal
+                ;
+    }
+
+    public int getId(){
+        return this.id;
+    }
+
+    public String getName(){
+        return this.name;
+    }
+
+    public static int getIdCreator() {
+        return idCreator;
+    }
+
+    public static void setIdCreator(int idCreator) {
+        Dragon.idCreator = idCreator;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+        if(id > idCreator){
+            Dragon.idCreator = id;
+        }
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Coordinates getCoordinates() {
+        return coordinates;
+    }
+
+    public void setCoordinates(Coordinates coordinates) {
+        this.coordinates = coordinates;
+    }
+
+    public LocalDate getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(LocalDate creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
+    public void setType(DragonType type) {
+        this.type = type;
+    }
+
+    public void setCharacter(DragonCharacter character) {
+        this.character = character;
+    }
+
+    public DragonCave getCave() {
+        return cave;
+    }
+
+    public void setCave(DragonCave cave) {
+        this.cave = cave;
+    }
+
+    @Override
+    public int compareTo(Dragon other) {
+        return this.name.compareTo(other.getName());
+    }
+
+    public boolean equals(Dragon d){
+        return id == d.getId();
+    }
+
+}
+// src/main/java/classes/DragonType.java
+package classes;
+
+public enum DragonType {
+    WATER,
+    UNDERGROUND,
+    AIR,
+    FIRE;
+
+    public int compareTo(Color other) {
+        return this.ordinal() - other.ordinal();
+    }
+}// src/main/java/classes/DragonCave.java
+package classes;
+
+/**
+ * Dragon's cave
+ */
+public class DragonCave {
+    public int depth;
+    public double numberOfTreasures; //Значение поля должно быть больше 0
+
+    public DragonCave(){
+    }
+
+    public DragonCave(int depth, double numberOfTreasures) {
+        this.depth = depth;
+        this.numberOfTreasures = numberOfTreasures;
+    }
+
+    public int getDepth() {
+        return depth;
+    }
+
+    public void setDepth(int depth) {
+        this.depth = depth;
+    }
+
+    public double getNumberOfTreasures() {
+        return numberOfTreasures;
+    }
+
+    public void setNumberOfTreasures(double numberOfTreasures) {
+        this.numberOfTreasures = numberOfTreasures;
+    }
+
+    @Override
+    public String toString(){
+        return "Depth: " + depth + "; Number of treasures: " + numberOfTreasures;
+    }
+}// src/main/java/classes/DragonCharacter.java
+package classes;
+
+/**
+ * Contains types: <br>
+ * <b>EVIL</b><br>
+ * <b>CHAOTIC_EVIL</b><br>
+ * <b>FICKLE</b><br>
+ */
+public enum DragonCharacter {
+    EVIL,
+    CHAOTIC_EVIL,
+    FICKLE;
+
+    public int compareTo(Color other) {
+        return this.ordinal() - other.ordinal();
+    }
+
+}// src/main/java/classes/Color.java
+package classes;
+
+import exceptions.NoSuchColorException;
+
+public enum Color {
+    BLACK("Black"),
+    YELLOW("Yellow"),
+    ORANGE("Orange"),
+    BROWN("Brown");
+
+    private final String name;
+
+    Color(String name){
+        this.name = name;
+    }
+    public String toString(){
+        return this.name;
+    }
+
+
+
+}// src/main/java/classes/Guarded.java
+
+class Guarded<T> {
+    
+}// src/main/java/managers/CommandManager.java
+package managers;
+
+import Interpreters.CommandInterpreter;
+import commands.BasicCommand;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Class that manages all the commands. Actually, that's some sort of a wrapper for Map ^_^
+ * Maybe got no sense but still I love it and I think it is some sort of Controller in MVC.
+ *
+ *
+*/
+public class CommandManager {
+    private final Map<String, BasicCommand> commandsMap = new HashMap<String, BasicCommand>();
+    CollectionManager collectionManager;
+    CommandInterpreter commandInterpreter;
+
+    /**
+     * Constructor for class
+     * @param collectionManager basically a {@link CollectionManager}
+     */
+    public CommandManager(CollectionManager collectionManager) {
+        this.collectionManager = collectionManager;
+    }
+
+    /**
+     * Adds command in command manager.
+     * @param command object of {@link BasicCommand} children
+     */
+    public void addCommand(BasicCommand command) {
+        this.commandsMap.put(command.getName(), command);
+
+    }
+
+    public Map<String, BasicCommand> getCommandsMap() {
+        return this.commandsMap;
+    }
+
+    public CollectionManager getCollectionManager(){
+        return this.collectionManager;
+    }
+
+    public void setCommandInterpreter(CommandInterpreter commandInterpreter) {
+        this.commandInterpreter = commandInterpreter;
+    }
+
+    public CommandInterpreter getCommandInterpreter() {
+        return commandInterpreter;
+    }
+
+
+    public BasicCommand getCommand(String name){
+        return commandsMap.get(name);
+    }
+
+
+}
+// src/main/java/managers/CollectionManager.java
+package managers;
+
+import classes.*;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Manager that manages collection
+ */
+public class CollectionManager {
+
+    Map<String, Dragon> collection = new HashMap<String, Dragon>();
+    private final java.time.LocalDate initTime;
+
+    /**
+     * May be initiated with no specific params
+     */
+    public CollectionManager(){
+        this.initTime = java.time.LocalDate.now();
+    }
+
+    /**
+     * May be initiated with JSON file. Uses {@link FileManager} for collection import.
+     * @param filename String of filename
+     */
+    public CollectionManager(String filename){
+        this();
+        this.collection = FileManager.importCollectionFromFile(filename);
+    }
+
+    /**
+     * Method that just creates a new empty collection
+     */
+    public void clearCollection(){
+        this.collection = new HashMap<String, Dragon>();
+    }
+
+    /**
+     * Used to return map info
+     * @return returns {@link Map}.
+     */
+    public Map<String, Object> getCollectionInfoMap(){
+        Map<String, Object> tmpMap = new HashMap<>();
+        tmpMap.put("Type", "HashMap");
+        tmpMap.put("Date", this.initTime);
+        tmpMap.put("ElementsQuantity", collection.size());
+        return tmpMap;
+    }
+
+    /**
+     * Adds element
+     * @param id String, aka "key" in map
+     * @param dragon Dragon object
+     * @return returns result of operation. True, if element was added, and false if there is already one in collection.
+     */
+    public boolean addElement(String id, Dragon dragon){
+        if(collection.containsKey(id)){
+            return false;
+        }else{
+            collection.put(id, dragon);
+            return true;
+        }
+    }
+
+    /**
+     * Replaces element
+     * @param id String, aka "key" for Map
+     * @param dragon {@link Dragon} object
+     */
+    public void replaceElement(String id, Dragon dragon){
+        collection.replace(id,dragon);
+    }
+
+    /**
+     * Some sort of wrapper for remove
+     * @param id String, aka "key" for Map
+     */
+    public void killElement(String id){
+        try {
+            collection.remove(id);
+        }catch (Throwable e){
+            System.out.println(e);
+        }
+    }
+
+    /**
+     * Small wrapper for Map get() method
+     * @param id String key
+     * @return returns dragon
+     */
+    public Dragon getElement(String id){
+        return collection.get(id);
+    }
+
+    public boolean hasElement(String id){
+        return collection.containsKey(id);
+    }
+
+    public Map<String, Dragon> getCollection(){
+        return collection;
+    }
+
+    public void setCollection(Map<String, Dragon> collection){
+        this.collection = collection;
+    }
+
+
+}
+// src/main/java/managers/FileManager.java
+package managers;
+
+import classes.Dragon;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Manager for files, Operates with way on how to save something and open it.
+ */
+public class FileManager {
+    /**
+     * Method to save collection to file. Uses Jackson.
+     * @param filename name of file where to send
+     * @param collection collection which should be stored
+     */
+    public static void saveCollectionToFile(String filename, Map<String, Dragon> collection){
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            objectMapper.registerModule(new JavaTimeModule());
+            objectMapper.writeValue(new File(filename), collection);
+            System.out.println("JSON создан успешно.");
+        } catch (FileNotFoundException e) {
+            System.out.println("Такой директории не существует.");
+        } catch (IOException e){
+            System.out.println("Произошла неопределённая проблема ввода/вывода.");
+        }
+    }
+
+    /**
+     * Opposite to save. Imports collection from file.
+     * @param filename file, from which collection is imported
+     * @return returns Map
+     */
+    public static Map<String, Dragon> importCollectionFromFile(String filename){
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            objectMapper.registerModule(new JavaTimeModule());
+            Map<String, Dragon> collection = objectMapper.readValue(new File(filename), new TypeReference<Map<String,Dragon>>(){});
+            System.out.println("JSON импортирован успешно.");
+            return collection;
+        } catch (FileNotFoundException e) {
+            System.out.println("Файл не найден. Создана пустая коллекция (проверьте имя файла).");
+        } catch (IOException e){
+            System.out.println("Произошла неопределённая проблема ввода/вывода. Создана пустая коллекция (проверьте файл с изначальной коллекцией).");
+        }
+        return new HashMap<String, Dragon>();
+    }
+
+
+}
+// src/main/java/managers/DragonCreationManager.java
+package managers;
+
+import classes.*;
+import exceptions.NullForbiddenException;
+import exceptions.RangeExceededException;
+import utils.InputChecker;
+
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+/**
+ * Basically class that is used only for dragon creation process
+ */
+public class DragonCreationManager {
+    /**
+     * Static method that goes through the whole process of dragon creation.
+     * @param input {@link Iterator} that would be used to access all the info about dragon
+     * @return returns {@link Dragon} object
+     */
+    static public Dragon inputDragon(Iterator<String> input){
+        String name = null;
+        Double coordinateX = null;
+        Long coordinateY = null;
+        Integer age = null;
+        Color color = null;
+        DragonType type = null;
+        DragonCharacter character = null;
+        Integer caveDepth = null;
+        Double treasures = null;
+        String tmpInput = "";
+        System.out.println("Name:");
+        while(name == null) {
+            try{
+                tmpInput = input.next();
+            } catch (NoSuchElementException e) {
+                System.out.println("Creation process was interrupted, nothing was added");
+                return null;
+            }
+            try {
+                name = InputChecker.inputNonNullChecker(tmpInput);
+            }
+            catch (NullForbiddenException e){
+                System.out.println(e);
+            }
+
+        }
+        System.out.println("Coordinate X (double):");
+        while(coordinateX == null) {
+            try{
+                tmpInput = input.next();
+            } catch (NoSuchElementException e) {
+                System.out.println("Creation process was interrupted, nothing was added");
+                return null;
+            }
+            try {
+                coordinateX = Double.parseDouble(tmpInput);
+            }catch (NumberFormatException e){
+                System.out.println("Неправильный формат числа");
+            }catch (Exception e){
+                System.out.println(e);
+            }
+        }
+        System.out.println("Coordinate Y (Long, must be not null and less than 984):");
+        while(coordinateY == null) {
+            try{
+                tmpInput = input.next();
+            } catch (NoSuchElementException e) {
+                System.out.println("Creation process was interrupted, nothing was added");
+                return null;
+            }
+            try {
+                coordinateY = InputChecker.inputRangeChecker(tmpInput, null, 984.0, true, Long.class);
+            }catch (NumberFormatException e){
+                System.out.println("Неправильный формат числа");
+            }catch (Exception e){
+                System.out.println(e);
+            }
+        }
+        System.out.println("Age (integer, must be more than 0 and not null):");
+        while(age == null) {
+            try{
+                tmpInput = input.next();
+            } catch (NoSuchElementException e) {
+                System.out.println("Creation process was interrupted, nothing was added");
+                return null;
+            }
+            try {
+                age = InputChecker.inputRangeChecker(tmpInput, 0.0, null,true, Integer.class);
+            }catch (NumberFormatException e){
+                System.out.println("Неправильный формат числа");
+            }catch (RangeExceededException e){
+                System.out.println(e);
+            }
+        }
+        System.out.println("Color (enum, non null, options are: black, yellow, orange, brown):");
+        while(color == null) {
+            try{
+                tmpInput = input.next();
+            } catch (NoSuchElementException e) {
+                System.out.println("Creation process was interrupted, nothing was added");
+                return null;
+            }
+            try {
+                color = InputChecker.getEnum(tmpInput, Color.class);
+            }catch (NoSuchElementException e){
+                System.out.println("Такого элемента нет. Выберите из представленных ранее.");
+            }catch (Exception e){
+                System.out.println(e);
+            }
+        }
+        System.out.println("Type (enum, non null, options are: water, underground, air, fire):");
+        while(type == null) {
+            try{
+                tmpInput = input.next();
+            } catch (NoSuchElementException e) {
+                System.out.println("Creation process was interrupted, nothing was added");
+                return null;
+            }
+            try {
+                type = InputChecker.getEnum(tmpInput, DragonType.class);
+            }catch (NoSuchElementException e){
+                System.out.println("Такого элемента нет. Выберите из представленных ранее.");
+            }catch (Exception e){
+                System.out.println(e);
+            }
+        }
+        System.out.println("Character (enum, non null, options are: evil, chaotic_evil, fickle):");
+        while(character == null) {
+            try{
+                tmpInput = input.next();
+            } catch (NoSuchElementException e) {
+                System.out.println("Creation process was interrupted, nothing was added");
+                return null;
+            }
+            try {
+                character = InputChecker.getEnum(tmpInput, DragonCharacter.class);
+            }catch (NoSuchElementException e){
+                System.out.println("Такого элемента нет. Выберите из представленных ранее.");
+            }catch (Exception e){
+                System.out.println(e);
+            }
+        }
+        System.out.println("Cave is being created. It might be null. \nIf at least one parameter will be null, cave will be null.");
+        System.out.println("Cave depth (integer, might be null):");
+        try{
+                tmpInput = input.next();
+            } catch (NoSuchElementException e) {
+                System.out.println("Creation process was interrupted, nothing was added");
+                return null;
+            }
+        try {
+            if(!tmpInput.trim().isBlank()){
+                caveDepth = Integer.parseInt(tmpInput);
+            }
+        }catch (NumberFormatException e){
+            System.out.println("Неправильный формат числа, записан null");
+        }catch (Exception e) {
+            System.out.println(e);
+        }
+        if(caveDepth != null) {
+            System.out.println("Cave depth (double, might be null, at least 0.0):");
+            try{
+                tmpInput = input.next();
+            } catch (NoSuchElementException e) {
+                System.out.println("Creation process was interrupted, nothing was added");
+                return null;
+            }
+            try {
+                if (!tmpInput.trim().isBlank()) {
+                    treasures = InputChecker.inputRangeChecker(tmpInput, 0.0, null, false, Double.class);
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Неправильный формат числа, записан null");
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+        }
+        DragonCave dragonCave;
+        if(caveDepth == null || treasures == null) {
+            dragonCave = null;
+        } else {
+            dragonCave = new DragonCave(caveDepth, treasures);
+        }
+
+
+        return new Dragon(name,
+                new Coordinates(coordinateX, coordinateY),
+                age,
+                color,
+                type,
+                character,
+                dragonCave);
+    }
+
+
+}
+// src/main/java/Main.java
+import Interpreters.CommandInterpreter;
+import commands.*;
+import managers.CollectionManager;
+import managers.CommandManager;
+import managers.FileManager;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.Iterator;
+
+class Main {
+    public static void main(String[] args) {
+        CollectionManager collectionManager;
+        if(args.length > 0){
+            collectionManager = new CollectionManager(args[0]);
+        }
+        else{
+            collectionManager = new CollectionManager();
+        }
+        CommandManager commandManager = new CommandManager(collectionManager);
+
+        commandManager.addCommand(new HelpCommand(commandManager));
+        commandManager.addCommand(new InfoCommand(collectionManager));
+        commandManager.addCommand(new ShowCommand(collectionManager));
+        commandManager.addCommand(new InsertCommand(collectionManager, commandManager));
+        commandManager.addCommand(new UpdateCommand(collectionManager, commandManager));
+        commandManager.addCommand(new RemoveKeyCommand(collectionManager));
+        commandManager.addCommand(new ClearCommand(collectionManager));
+        commandManager.addCommand(new SaveCommand(collectionManager));
+        commandManager.addCommand(new ExecuteScriptCommand(commandManager));
+        commandManager.addCommand(new ExitCommand());
+        commandManager.addCommand(new RemoveGreaterCommand(collectionManager));
+        commandManager.addCommand(new ReplaceIfLowerCommand(collectionManager, commandManager));
+        commandManager.addCommand(new RemoveGreaterKeyCommand(collectionManager));
+        commandManager.addCommand(new CountLessThanCharacterCommand(collectionManager));
+        commandManager.addCommand(new PrintAscendingCommand(collectionManager));
+        commandManager.addCommand(new PrintFieldDescendingTypeCommand(collectionManager));
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        Iterator<String> it = in.lines().iterator();
+
+        CommandInterpreter commandInterpreter = new CommandInterpreter(commandManager, it);
+
+
+        commandInterpreter.loop_stdin();
+    /*
+        "  - help : вывести справку по доступным командам\n" +
+        "  - info : вывести в стандартный поток вывода информацию о коллекции (тип, дата инициализации, количество элементов и т.д.)\n" +
+        "  - show : вывести в стандартный поток вывода все элементы коллекции в строковом представлении\n" +
+        "  - insert null {element} : добавить новый элемент с заданным ключом\n" +
+        "  - update id {element} : обновить значение элемента коллекции, id которого равен заданному\n" +
+        "  - remove_key null : удалить элемент из коллекции по его ключу\n" +
+        "  - clear : очистить коллекцию\n" +
+        "  - save : сохранить коллекцию в файл\n" +
+        "  - execute_script file_name : считать и исполнить скрипт из указанного файла. В скрипте содержатся команды в таком же виде, в котором их вводит пользователь в интерактивном режиме.\n" +
+        "  - exit : завершить программу (без сохранения в файл)\n" +
+        "  - remove_greater {element} : удалить из коллекции все элементы, превышающие заданный\n" +
+        "  - replace_if_lowe null {element} : заменить значение по ключу, если новое значение меньше старого\n" +
+        "  - remove_greater_key null : удалить из коллекции все элементы, ключ которых превышает заданный\n" +
+        "  - count_less_than_character character : вывести количество элементов, значение поля character которых меньше заданного\n" +
+        "  - print_ascending : вывести элементы коллекции в порядке возрастания\n" +
+        "  - print_field_descending_type : вывести значения поля type всех элементов в порядке убывания";
+    */
+
+
+
+
+    }
+}
+// src/main/java/Interpreters/CommandInterpreter.java
+package Interpreters;
+
+import java.io.FileNotFoundException;
+import java.nio.file.NoSuchFileException;
+import java.util.*;
+import commands.*;
+import exceptions.*;
+import exceptions.NoSuchElementException;
+import managers.*;
+
+/**
+ * One of main classes in program. Basically it is used for executing anything.
+ */
+public class CommandInterpreter {
+
+    CommandManager commandManager;
+    Iterator<String> it;
+    Set<String> executableFiles = new HashSet<String>();
+
+    /**
+     * Basic or initial constructor is used for CLI input. In this case CommandInterpreter needs only {@link CommandManager} and {@link Iterator<String>}
+     * @param commandManager It is what it is
+     * @param input Should be Iterator with String.
+     */
+    public CommandInterpreter(CommandManager commandManager, Iterator<String> input) {
+        this.commandManager = commandManager;
+        this.commandManager.setCommandInterpreter(this);
+        this.it = input;
+    }
+
+    /**
+     * In case you want to execute files, you might want to store them (just to exclude chanse infinite recursion). For this {@link Set} with filenames is stored.
+     * @param commandManager It is what it is
+     * @param input Iterator with String
+     * @param executableFiles Set with all the files that were executed before.
+     */
+    public CommandInterpreter(CommandManager commandManager, Iterator<String> input, Set<String> executableFiles) {
+        this.commandManager = commandManager;
+        this.commandManager.setCommandInterpreter(this);
+        this.it = input;
+        this.executableFiles = executableFiles;
+    }
+
+    /**
+     * Checks if this file was in execution sequence
+     * @param filename name of file that we want to check
+     * @return returns true if it did execute that file
+     */
+    public boolean executedFile(String filename){
+        return executableFiles.contains(filename);
+    }
+
+    /**
+     * Main loop that gets your input from CLI
+     */
+    public void loop_stdin() {
+        System.out.print(">>> ");
+        while (it.hasNext()) {
+            String line = it.next();
+            executeLine(line);
+            System.out.print(">>> ");
+        }
+    }
+
+    /**
+     * loop_stdin() modification for file execution. Does not print out ">>> "
+     */
+    public void fileExecution(){
+        while (it.hasNext()) {
+            String line = it.next();
+            executeLine(line);
+        }
+    }
+
+    /**
+     * Method that is used for initial execution of line. <br>
+     * <i>public</i>, to be used in lab7 to execute line in server. <br>
+     * <br>
+     * <b>Note</b> that this method <b>DOES NOT</b> do anything with command args. It just splits line by spaces, uses first word as command and parses rest to the command. <br>
+     * <b>Note</b> that it may send array of 0 length to your command. You should check input for such an option.
+     * @param line basically a line with command.
+     */
+    public void executeLine(String line){
+
+            if (line.trim().isBlank()) {
+                return;
+            }
+            String[] parts = line.trim().split("[ \t]+");
+            String commandName = parts[0];
+
+            BasicCommand command = commandManager.getCommand(commandName);
+
+            String[] args = (parts.length > 1) ? Arrays.copyOfRange(parts, 1, parts.length) : new String[0];
+            if (command != null) {
+                try {
+                command.execute(args);
+            }catch (CustomException | FileNotFoundException e){
+                System.out.println(e);
+            }
+            } else {
+                System.out.println("Unknown command: " + commandName);
+            }
+
+
+    }
+
+    public Iterator<String> getInputIterator() {
+        return it;
+    }
+    public CollectionManager getCollectionManager(){
+        return this.commandManager.getCollectionManager();
+    }
+    public Set<String> getExecutableFiles() {
+        return executableFiles;
+    }
+
+}
