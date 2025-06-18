@@ -72,6 +72,8 @@ public class DragonTableView extends Application {
         startLogin();
         primaryStage.setTitle("Dragon Collection Viewer");
 
+
+
         if (collectionManager == null) {
             collectionManager = new CollectionManager();
             Dragon testDragon1 = new Dragon("Smaug", new Coordinates(10.5, 100L), 171, Color.BLACK, DragonType.FIRE, DragonCharacter.EVIL, new DragonCave(1000, 100000.0));
@@ -123,7 +125,19 @@ public class DragonTableView extends Application {
 
         Scene scene = new Scene(root, 1200, 800);
         primaryStage.setScene(scene);
+        new Thread(() -> {
+            while(true){
+                collectionManager.sync();
+                loadDataFromCollectionManager();
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
         primaryStage.show();
+
     }
 
     private void startLogin() {
