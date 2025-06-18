@@ -5,6 +5,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import gui.managers.CommandsManager;
+import gui.managers.LocaleManager;
 import gui.screens.DragonFormScreen;
 import gui.screens.LoginScreen;
 import javafx.application.Application;
@@ -45,7 +46,7 @@ import structs.wrappers.DragonDisplayWrapper;
 
 public class DragonTableView extends Application {
 
-    ///private final LocaleManager localeManager = LocaleManager.getInstance();
+    private final LocaleManager localeManager = LocaleManager.getInstance();
     private static CollectionManager collectionManager;
     private final ObservableList<DragonDisplayWrapper> masterData = FXCollections.observableArrayList();
     User user = null;
