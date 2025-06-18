@@ -1,13 +1,13 @@
 package gui.managers;
 
+import java.io.IOException;
+import java.nio.channels.SocketChannel;
+
 import commands.server.InfoCommand;
 import managers.ConnectionManager;
 import structs.Packet;
 import utils.RequestConstructor;
 import utils.RequestResponseTool;
-
-import java.io.IOException;
-import java.nio.channels.SocketChannel;
 
 public class ActionsManager {
 
