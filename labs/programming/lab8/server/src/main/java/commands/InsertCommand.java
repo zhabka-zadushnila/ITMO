@@ -1,13 +1,13 @@
 package commands;
 
-import classes.Dragon;
+import java.util.Map;
+
 import exceptions.NullArgsForbiddenException;
 import managers.CollectionManager;
 import managers.CommandManager;
 import structs.SQLAnswer;
 import structs.User;
-
-import java.util.Map;
+import structs.classes.Dragon;
 
 /**
  * Command that is used for adding some stuff in collection. Operates with both {@link CommandManager} and {@link CollectionManager}.
@@ -36,8 +36,6 @@ public class InsertCommand extends BasicCommand {
         if (entry.getValue() == null) {
             return "";
         }
-        dragon.setId(Dragon.getIdCreator());
-        Dragon.setIdCreator(Dragon.getIdCreator() + 1);
         if (collectionManager.hasElement(entry.getKey())) {
             return "such element already exists, nothing changed";
         } else {

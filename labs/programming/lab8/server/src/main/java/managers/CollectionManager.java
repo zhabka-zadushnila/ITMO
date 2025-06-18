@@ -1,6 +1,6 @@
 package managers;
 
-import classes.Dragon;
+import structs.classes.Dragon;
 
 import java.util.Collections;
 import java.util.HashMap;
