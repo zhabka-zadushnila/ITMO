@@ -34,7 +34,7 @@ public class ConnectionManager {
     public void serve() {
         try {
             serverSocketChannel = ServerSocketChannel.open();
-            serverSocketChannel.bind(new InetSocketAddress(port));
+            serverSocketChannel.bind(new InetSocketAddress("0.0.0.0" ,port));
             logger.info("Server started on port " + port);
 
             new Thread(this::handleConsoleInput).start();

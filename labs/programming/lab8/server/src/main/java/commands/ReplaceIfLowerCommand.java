@@ -43,6 +43,7 @@ public class ReplaceIfLowerCommand extends BasicCommand {
             if (collectionManager.getElement(entry.getKey()).compareTo(dragon) < 0) {
                 if (collectionManager.getDbManager().updateDragon(dragon, entry.getKey(), user.getLogin()).isExpectedBehabiour()) {
                     collectionManager.replaceElement(entry.getKey(), dragon);
+                    return "Successfully replaced an element";
                 }
             } else {
                 return ("New dragon is not less than new one, nothing has changed :)");

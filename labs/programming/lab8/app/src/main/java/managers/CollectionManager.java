@@ -130,9 +130,7 @@ public class CollectionManager {
     }
 
     public void sync(){
-        System.out.println("sync started");
         Packet packet = RequestConstructor.createRequest();
-        System.out.println("sync asked");
         try {
             RequestResponseTool.sendPacket(channel, packet);
         } catch (IOException ex) {
