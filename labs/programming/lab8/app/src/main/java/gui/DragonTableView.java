@@ -6,7 +6,6 @@ import java.util.Map;
 import gui.managers.CommandsManager;
 import gui.screens.DragonFormScreen;
 import gui.screens.LoginScreen;
-import structs.wrappers.DragonDisplayWrapper;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -36,14 +35,14 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import managers.CollectionManager;
-
+import structs.User;
 import structs.classes.Color;
 import structs.classes.Coordinates;
 import structs.classes.Dragon;
 import structs.classes.DragonCave;
 import structs.classes.DragonCharacter;
 import structs.classes.DragonType;
-import structs.User;
+import structs.wrappers.DragonDisplayWrapper;
 
 
 /**
@@ -108,6 +107,8 @@ public class DragonTableView extends Application {
         Label title = new Label("Область визуализации");
         title.setFont(Font.font("Arial", FontWeight.NORMAL, 14));
 
+        Button updateButton = new Button("Обновить дракона");
+        updateButton.setOnAction(e -> updateDragon());
 
         VBox rightBox = new VBox(5);
         rightBox.setAlignment(Pos.TOP_CENTER);
@@ -128,7 +129,21 @@ public class DragonTableView extends Application {
         this.user = (new LoginScreen()).start();
     }
 
-
+    private void updateDragon(){
+        DragonDisplayWrapper selectedForUpdate = table.getSelectionModel().getSelectedItem();
+        if (selectedForUpdate.getOwner().equals(user.getLogin())) {
+            DragonFormScreen updateDialog = new DragonFormScreen();
+            Dragon newDragon = updateDialog.updateDragon(selectedForUpdate);
+            newDragon.setOwnerLogin(user.getLogin());
+            if (newDragon != null) {
+                collectionManager.replaceElement(selectedForUpdate.getKey(), newDragon);
+                String response = commandsManager.updateDragon(new DragonDisplayWrapper(selectedForUpdate.getKey(), newDragon), user);
+                showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                collectionManager.sync();
+                loadDataFromCollectionManager();
+            }
+        }
+    }
     private BorderPane createTopPanel() {
         BorderPane topPanel = new BorderPane();
 
