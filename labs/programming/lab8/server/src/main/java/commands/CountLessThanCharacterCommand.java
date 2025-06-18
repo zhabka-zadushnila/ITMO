@@ -1,10 +1,10 @@
 package commands;
 
-import classes.DragonCharacter;
 import exceptions.NoSuchElementException;
 import exceptions.NullArgsForbiddenException;
 import managers.CollectionManager;
 import structs.User;
+import structs.classes.DragonCharacter;
 import utils.InputChecker;
 
 /**

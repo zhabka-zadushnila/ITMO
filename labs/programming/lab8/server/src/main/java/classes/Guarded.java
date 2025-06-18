@@ -1,4 +1,0 @@
-
-class Guarded<T> {
-    
-}
