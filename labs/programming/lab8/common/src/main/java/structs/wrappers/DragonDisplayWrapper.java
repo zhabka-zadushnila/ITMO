@@ -1,14 +1,16 @@
-package gui.utils;
+package structs.wrappers;
 
 
 import structs.classes.Dragon;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.stream.Stream;
 
-public class DragonDisplayWrapper {
+public class DragonDisplayWrapper implements Serializable {
     private final String key;
     private final Dragon originalDragon;
+    private static final long serialVersionUID = 1L;
 
     public DragonDisplayWrapper(String key, Dragon dragon) {
         this.key = key;
@@ -66,6 +68,7 @@ public class DragonDisplayWrapper {
     public Dragon getOriginalDragon() {
         return originalDragon;
     }
+    public Dragon getValue(){ return  originalDragon;}
 
 
     public Stream<String> getStreamOfFields() {

@@ -101,6 +101,7 @@ public class ClientHandler implements Runnable {
     }
 
     private void sendResponse(SocketChannel socketChannel, String message) {
+        System.out.println("Sending back: " + message);
         Packet responsePacket = RequestConstructor.createRequest(message);
         RequestResponseTool.sendRequest(socketChannel, responsePacket);
     }

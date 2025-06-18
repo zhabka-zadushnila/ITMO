@@ -5,6 +5,7 @@ import managers.ConnectionManager;
 import structs.Packet;
 import structs.User;
 import structs.classes.Dragon;
+import structs.wrappers.DragonDisplayWrapper;
 import utils.RequestConstructor;
 import utils.RequestResponseTool;
 
@@ -29,7 +30,7 @@ public class CommandsManager {
         this.port = port;
     }
 
-    public String insertDragon(Map.Entry<String, Dragon> dragonEntry, User user) {
+    public String insertDragon(DragonDisplayWrapper dragonEntry, User user) {
         Packet packet = RequestConstructor.createRequest(new InsertCommand(null, null), null, dragonEntry, user);
         try {
             RequestResponseTool.sendPacket(channel, packet);
@@ -44,7 +45,7 @@ public class CommandsManager {
         }
     }
 
-    public String updateDragon(Map.Entry<String, Dragon> dragonEntry, User user) {
+    public String updateDragon(DragonDisplayWrapper dragonEntry, User user) {
         Packet packet = RequestConstructor.createRequest(new UpdateCommand(null, null), null, dragonEntry, user);
         try {
             RequestResponseTool.sendPacket(channel, packet);
@@ -59,7 +60,7 @@ public class CommandsManager {
         }
     }
 
-    public String replaceIfLowerDragon(Map.Entry<String, Dragon> dragonEntry, User user) {
+    public String replaceIfLowerDragon(DragonDisplayWrapper dragonEntry, User user) {
         Packet packet = RequestConstructor.createRequest(new ReplaceIfLowerCommand(null, null), null, dragonEntry, user);
         try {
             RequestResponseTool.sendPacket(channel, packet);

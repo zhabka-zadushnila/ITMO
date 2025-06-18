@@ -21,8 +21,8 @@ public class CollectionManager {
     Map<String, Dragon> collection = FXCollections.observableHashMap();
     static int MAX_RECONNECT_ATTEMPTS = 5;
     static int RECONNECT_TIMEOUT = 2000; //millis
-    String hostname;
-    int port;
+    String hostname = "localhost";
+    int port = 52947;
     SocketChannel channel = ConnectionManager.connectToServer(hostname, port, MAX_RECONNECT_ATTEMPTS, RECONNECT_TIMEOUT);
 
 
@@ -130,12 +130,19 @@ public class CollectionManager {
     }
 
     public void sync(){
+        System.out.println("sync started");
         Packet packet = RequestConstructor.createRequest();
+        System.out.println("sync asked");
         try {
             RequestResponseTool.sendPacket(channel, packet);
         } catch (IOException ex) {
+            ex.printStackTrace();
         }
         packet = RequestResponseTool.getPacket(channel);
+        if(packet == null){
+            System.out.println("somehow packet in sync is null");
+            return;
+        }
         Map<String, Dragon> updatedCollection = packet.getMap();
         this.collection = updatedCollection;
 

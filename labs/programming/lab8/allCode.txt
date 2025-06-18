@@ -6299,7 +6299,7 @@ public class AppStarter {
 package gui;
 
 import gui.screens.LoginScreen;
-import gui.utils.DragonDisplayWrapper;
+import structs.wrappers.DragonDisplayWrapper;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

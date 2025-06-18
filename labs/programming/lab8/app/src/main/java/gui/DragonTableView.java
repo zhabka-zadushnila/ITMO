@@ -6,7 +6,7 @@ import java.util.Map;
 import gui.managers.CommandsManager;
 import gui.screens.DragonFormScreen;
 import gui.screens.LoginScreen;
-import gui.utils.DragonDisplayWrapper;
+import structs.wrappers.DragonDisplayWrapper;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -44,10 +44,6 @@ import structs.classes.DragonCave;
 import structs.classes.DragonCharacter;
 import structs.classes.DragonType;
 import structs.User;
-import structs.classes.*;
-
-import java.time.LocalDate;
-import java.util.Map;
 
 
 /**
@@ -349,7 +345,7 @@ public class DragonTableView extends Application {
 
             case "insert":
                 DragonFormScreen insertDialog = new DragonFormScreen();
-                Map.Entry<String, Dragon> newEntry = insertDialog.getNewDragon();
+                DragonDisplayWrapper newEntry = insertDialog.getNewDragon();
                 if (newEntry != null) {
                     newEntry.getValue().setOwnerLogin(user.getLogin());
                     String response = commandsManager.insertDragon(newEntry, user);
@@ -366,7 +362,7 @@ public class DragonTableView extends Application {
                     Dragon newDragon = updateDialog.updateDragon(selectedForUpdate);
                     if (newDragon != null) {
                         collectionManager.replaceElement(selectedForUpdate.getKey(), newDragon);
-                        String response = commandsManager.updateDragon(Map.entry(selectedForUpdate.getKey(), newDragon), user);
+                        String response = commandsManager.updateDragon(new DragonDisplayWrapper(selectedForUpdate.getKey(), newDragon), user);
                         showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
                         collectionManager.sync();
                         loadDataFromCollectionManager();
@@ -383,7 +379,7 @@ public class DragonTableView extends Application {
                     Dragon newDragon = updateDialog.updateDragon(selectedForReplace);
                     if (newDragon != null) {
                         collectionManager.replaceElement(selectedForReplace.getKey(), newDragon);
-                        String response = commandsManager.replaceIfLowerDragon(Map.entry(selectedForReplace.getKey(), newDragon), user);
+                        String response = commandsManager.replaceIfLowerDragon(new DragonDisplayWrapper(selectedForReplace.getKey(), newDragon), user);
                         showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
                         collectionManager.sync();
                         loadDataFromCollectionManager();
@@ -420,6 +416,7 @@ public class DragonTableView extends Application {
 
             case "info":
                 collectionManager.sync();
+                loadDataFromCollectionManager();
                 Map<String, Object> info = collectionManager.getCollectionInfoMap();
                 showAlert(Alert.AlertType.INFORMATION, "Collection Info",
                         "Type: " + info.get("Type") + "\n" +
@@ -430,6 +427,7 @@ public class DragonTableView extends Application {
             case "show":
             default:
                 System.out.println("Displaying current collection state.");
+                collectionManager.sync();
                 loadDataFromCollectionManager();
                 break;
         }

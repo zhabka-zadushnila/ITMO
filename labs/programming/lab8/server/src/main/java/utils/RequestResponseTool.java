@@ -64,6 +64,7 @@ public class RequestResponseTool {
             if (object instanceof Packet) {
                 return (Packet) object;
             } else {
+                System.out.println("damn thats bad packet" + object.toString());
                 throw new WrongRequestException();
             }
         } catch (IOException e) {

@@ -1,6 +1,6 @@
 package gui.screens;
 
-import gui.utils.DragonDisplayWrapper;
+import structs.wrappers.DragonDisplayWrapper;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -16,9 +16,9 @@ import java.util.Map;
 public class DragonFormScreen {
 
     private Dragon resultDragon = null;
-    private Map.Entry<String, Dragon> resultEntry = null;
+    private DragonDisplayWrapper resultEntry = null;
 
-    public Map.Entry<String, Dragon> getNewDragon() {
+    public DragonDisplayWrapper getNewDragon() {
         this.resultEntry = null;
         showEntryForm("Create New Dragon");
         return this.resultEntry;
@@ -296,7 +296,7 @@ public class DragonFormScreen {
                 cave = new DragonCave(depth, treasures);
             }
 
-            this.resultEntry = Map.entry(id, new Dragon(name, coordinates, age, color, type, character, cave));
+            this.resultEntry = new DragonDisplayWrapper(id, new Dragon(name, coordinates, age, color, type, character, cave));
             return true;
 
         } catch (NumberFormatException nfe) {

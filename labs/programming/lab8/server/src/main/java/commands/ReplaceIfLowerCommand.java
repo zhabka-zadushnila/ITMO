@@ -8,6 +8,7 @@ import managers.CollectionManager;
 import managers.CommandManager;
 import structs.User;
 import structs.classes.Dragon;
+import structs.wrappers.DragonDisplayWrapper;
 
 
 /**
@@ -30,7 +31,7 @@ public class ReplaceIfLowerCommand extends BasicCommand {
         if (arguments == null) {
             return "Something strange, seems like you've provided null";
         }
-        Map.Entry<String, Dragon> entry = (Map.Entry<String, Dragon>) arguments;
+        DragonDisplayWrapper entry = (DragonDisplayWrapper) arguments;
         Dragon dragon = entry.getValue();
         if (dragon == null) {
             return "";

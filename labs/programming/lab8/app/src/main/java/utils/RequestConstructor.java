@@ -1,5 +1,6 @@
 package utils;
 
+import java.util.Map;
 import java.util.TreeMap;
 
 import commands.BasicCommand;
@@ -7,6 +8,7 @@ import structs.Packet;
 import structs.PacketType;
 import structs.User;
 import structs.classes.Dragon;
+import structs.wrappers.DragonDisplayWrapper;
 
 public class RequestConstructor {
 
@@ -18,6 +20,8 @@ public class RequestConstructor {
         } else if (object instanceof User) {
             return new Packet(PacketType.OBJECT_COMMAND, command.getName(), args, (User) object);
             //was PacketType.AUTH
+        } else if (object instanceof DragonDisplayWrapper){
+            return new Packet(PacketType.OBJECT_COMMAND, command.getName(), args, object, user);
         }
 
         return null;
