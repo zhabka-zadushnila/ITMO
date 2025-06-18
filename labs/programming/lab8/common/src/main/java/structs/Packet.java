@@ -6,6 +6,8 @@ import java.util.Map;
 
 import structs.classes.Dragon;
 
+
+
 public class Packet implements Serializable {
     private static final long serialVersionUID = 1L;
     User user;
@@ -77,6 +79,10 @@ public class Packet implements Serializable {
 
     public boolean isObjectCommand() {
         return packetType == PacketType.OBJECT_COMMAND;
+    }
+
+    public boolean isMap(){
+        return packetType == PacketType.MAP;
     }
 
 
