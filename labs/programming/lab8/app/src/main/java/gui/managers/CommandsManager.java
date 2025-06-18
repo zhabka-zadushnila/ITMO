@@ -1,23 +1,25 @@
 package gui.managers;
 
-import commands.server.*;
+import java.io.IOException;
+import java.nio.channels.SocketChannel;
+
+import commands.server.InsertCommand;
+import commands.server.RemoveGreaterKeyCommand;
+import commands.server.RemoveKeyCommand;
+import commands.server.ReplaceIfLowerCommand;
+import commands.server.UpdateCommand;
 import managers.ConnectionManager;
 import structs.Packet;
 import structs.User;
-import structs.classes.Dragon;
 import structs.wrappers.DragonDisplayWrapper;
 import utils.RequestConstructor;
 import utils.RequestResponseTool;
-
-import java.io.IOException;
-import java.nio.channels.SocketChannel;
-import java.util.Map;
 
 public class CommandsManager {
 
     static int MAX_RECONNECT_ATTEMPTS = 5;
     static int RECONNECT_TIMEOUT = 2000; //millis
-    String hostname = "localhost";
+    String hostname = "188.242.233.237";
     int port = 52947;
     SocketChannel channel = ConnectionManager.connectToServer(hostname, port, MAX_RECONNECT_ATTEMPTS, RECONNECT_TIMEOUT);
 
