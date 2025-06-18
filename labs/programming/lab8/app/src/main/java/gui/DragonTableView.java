@@ -4,11 +4,12 @@ import java.time.LocalDate;
 import java.util.Map;
 
 import gui.managers.CommandsManager;
-import gui.managers.LocaleManager;
 import gui.screens.DragonFormScreen;
 import gui.screens.LoginScreen;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -49,7 +50,7 @@ import structs.wrappers.DragonDisplayWrapper;
 
 public class DragonTableView extends Application {
 
-    private final LocaleManager localeManager = LocaleManager.getInstance();
+    ///private final LocaleManager localeManager = LocaleManager.getInstance();
     private static CollectionManager collectionManager;
     private final ObservableList<DragonDisplayWrapper> masterData = FXCollections.observableArrayList();
     User user = null;
@@ -60,6 +61,7 @@ public class DragonTableView extends Application {
 
     private TableView<DragonDisplayWrapper> table = new TableView<>();
     private TextField filterField;
+    private Pane visual;
     private CommandsManager commandsManager = new CommandsManager();
 
     public static void initialize(CollectionManager cm) {
@@ -69,8 +71,11 @@ public class DragonTableView extends Application {
     @Override
     public void start(Stage primaryStage) {
         startLogin();
-        primaryStage.titleProperty().bind(localeManager.createStringBinding("app.title"));
+       /// primaryStage.titleProperty().bind(localeManager.createStringBinding("app.title"));
 
+        masterData.addListener((ListChangeListener<DragonDisplayWrapper>) change -> {
+        updateVisualPane(primaryStage);
+        });
 
         if (collectionManager == null) {
             collectionManager = new CollectionManager();
@@ -94,10 +99,10 @@ public class DragonTableView extends Application {
         FlowPane bottomPanel = createBottomPanel();
         root.setBottom(bottomPanel);
 
-        Pane visualPane = createRightPannel(primaryStage); 
-        visualPane.prefWidthProperty().bind(root.widthProperty().multiply(0.475));
-        visualPane.prefHeightProperty().bind(root.heightProperty());
-        visualPane.setStyle(
+        visual = createRightPannel(primaryStage); 
+        visual.prefWidthProperty().bind(root.widthProperty().multiply(0.475));
+        visual.prefHeightProperty().bind(root.heightProperty());
+        visual.setStyle(
             "-fx-border-color: #333333;" +
             "-fx-border-width: 2;" +
             "-fx-border-radius: 4;" +
@@ -111,7 +116,7 @@ public class DragonTableView extends Application {
         VBox rightBox = new VBox(5);
 
         rightBox.setAlignment(Pos.TOP_CENTER);
-        rightBox.getChildren().addAll(title, visualPane);
+        rightBox.getChildren().addAll(title, visual);
         BorderPane.setMargin(rightBox, new Insets(0, 0, 0, 10)); 
 
         root.setRight(rightBox);
@@ -122,13 +127,18 @@ public class DragonTableView extends Application {
         primaryStage.setScene(scene);
 
         new Thread(() -> {
-            while(true){
-                collectionManager.sync();
-                loadDataFromCollectionManager();
+            while (true) {
                 try {
-                    Thread.sleep(POLL_RATIO);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                    collectionManager.sync();
+
+                    Platform.runLater(() -> {
+                        loadDataFromCollectionManager();
+                        updateVisualPane(primaryStage);
+                    });
+
+                    Thread.sleep(2000);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }).start();
@@ -140,20 +150,32 @@ public class DragonTableView extends Application {
         this.user = (new LoginScreen()).start();
     }
 
+    private void updateVisualPane(Stage primaryStage) {
+        visual.getChildren().clear();  
+        for (DragonDisplayWrapper dragonWrapper : masterData) {
+            Dragon dragon = dragonWrapper.getOriginalDragon();
+            Node visualisation = getVisualisation(dragon, primaryStage, dragonWrapper.getKey());
+            visual.getChildren().add(visualisation);
+        }
+    }
+
     private void updateDragon(Dragon dragon, String key){
+
         DragonDisplayWrapper selectedForUpdate = new DragonDisplayWrapper(key, dragon);
         if (dragon.getOwnerLogin().equals(user.getLogin())) {
             DragonFormScreen updateDialog = new DragonFormScreen();
             Dragon newDragon = updateDialog.updateDragon(selectedForUpdate);
-            newDragon.setOwnerLogin(user.getLogin());
+
             if (newDragon != null) {
+                newDragon.setOwnerLogin(user.getLogin());
                 collectionManager.replaceElement(selectedForUpdate.getKey(), newDragon);
                 String response = commandsManager.updateDragon(new DragonDisplayWrapper(selectedForUpdate.getKey(), newDragon), user);
                 showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
                 collectionManager.sync();
                 loadDataFromCollectionManager();
-            } 
-        }else {
+            }
+        
+        } else {
             showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
         }
     }
@@ -189,10 +211,9 @@ public class DragonTableView extends Application {
 
     private Pane createRightPannel(Stage primaryStage){
         Pane pane = new Pane();
-        Map<String, Dragon> collection = collectionManager.getCollection();
-        for (Map.Entry<String, Dragon> entry : collection.entrySet()) {
-            Dragon dragon = entry.getValue();
-            Node visualisation = getVisualisation(dragon, primaryStage, entry.getKey());
+        for (DragonDisplayWrapper dragonWrapper : masterData) {
+            Dragon dragon = dragonWrapper.getOriginalDragon();
+            Node visualisation = getVisualisation(dragon, primaryStage, dragonWrapper.getKey());
             pane.getChildren().add(visualisation);
         }
         return pane;
@@ -206,7 +227,7 @@ public class DragonTableView extends Application {
         double x = dragon.getCoordinates().getX();
         double y = dragon.getCoordinates().getY();
         double correctX = ((101*x) % 500) + 50;
-        double correctY = (y % 600);
+        double correctY = (y*423 % 600);
         switch(type){
             case FIRE -> {
             Circle figure = new Circle(correctX, correctY, 15);
@@ -256,7 +277,7 @@ public class DragonTableView extends Application {
 
     private javafx.scene.paint.Color getColorByOwner(String login){
         int hash = Math.abs(login.hashCode());
-        double hue = (hash*44) % 360;
+        double hue = (hash*788) % 360;
         double saturation = 0.7;
         double brightness = 0.9;
         return javafx.scene.paint.Color.hsb(hue, saturation, brightness);
@@ -410,62 +431,75 @@ private void attachInfoHandler(Node node, Dragon dragon, Stage primaryStage, Str
 
             case "update":
                 DragonDisplayWrapper selectedForUpdate = table.getSelectionModel().getSelectedItem();
-                if (selectedForUpdate.getOwner().equals(user.getLogin())) {
-                    DragonFormScreen updateDialog = new DragonFormScreen();
-                    Dragon newDragon = updateDialog.updateDragon(selectedForUpdate);
-                    newDragon.setOwnerLogin(user.getLogin());
-                    if (newDragon != null) {
-                        collectionManager.replaceElement(selectedForUpdate.getKey(), newDragon);
-                        String response = commandsManager.updateDragon(new DragonDisplayWrapper(selectedForUpdate.getKey(), newDragon), user);
-                        showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
-                        collectionManager.sync();
-                        loadDataFromCollectionManager();
+                if(selectedForUpdate != null){
+                    if (selectedForUpdate.getOwner().equals(user.getLogin())) {
+                        DragonFormScreen updateDialog = new DragonFormScreen();
+                        Dragon newDragon = updateDialog.updateDragon(selectedForUpdate);
+                        newDragon.setOwnerLogin(user.getLogin());
+                        if (newDragon != null) {
+                            collectionManager.replaceElement(selectedForUpdate.getKey(), newDragon);
+                            String response = commandsManager.updateDragon(new DragonDisplayWrapper(selectedForUpdate.getKey(), newDragon), user);
+                            showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                            collectionManager.sync();
+                            loadDataFromCollectionManager();
+                        }
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
                     }
-                } else {
-                    showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
+
                 }
                 break;
 
             case "replace_if_lower":
                 DragonDisplayWrapper selectedForReplace = table.getSelectionModel().getSelectedItem();
-                if (selectedForReplace.getOwner().equals(user.getLogin())) {
-                    DragonFormScreen updateDialog = new DragonFormScreen();
-                    Dragon newDragon = updateDialog.updateDragon(selectedForReplace);
-                    newDragon.setOwnerLogin(user.getLogin());
-                    if (newDragon != null) {
-                        collectionManager.replaceElement(selectedForReplace.getKey(), newDragon);
-                        String response = commandsManager.replaceIfLowerDragon(new DragonDisplayWrapper(selectedForReplace.getKey(), newDragon), user);
-                        showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
-                        collectionManager.sync();
-                        loadDataFromCollectionManager();
+                if(selectedForReplace != null){
+                    if (selectedForReplace.getOwner().equals(user.getLogin())) {
+                        DragonFormScreen updateDialog = new DragonFormScreen();
+                        Dragon newDragon = updateDialog.updateDragon(selectedForReplace);
+                        newDragon.setOwnerLogin(user.getLogin());
+                        if (newDragon != null) {
+                            collectionManager.replaceElement(selectedForReplace.getKey(), newDragon);
+                            String response = commandsManager.replaceIfLowerDragon(new DragonDisplayWrapper(selectedForReplace.getKey(), newDragon), user);
+                            showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                            collectionManager.sync();
+                            loadDataFromCollectionManager();
+                        }
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
                     }
-                } else {
-                    showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
+
                 }
                 break;
 
             case "remove_key":
                 DragonDisplayWrapper selectedForRemove = table.getSelectionModel().getSelectedItem();
-                if (selectedForRemove.getOwner().equals(user.getLogin())) {
-                    String response = commandsManager.removeKeyDragon(new String[]{selectedForRemove.getKey()}, user);
-                    showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
-                    collectionManager.sync();
-                    loadDataFromCollectionManager();
+                if(selectedForRemove != null){
+                    if (selectedForRemove.getOwner().equals(user.getLogin())) {
+                        String response = commandsManager.removeKeyDragon(new String[]{selectedForRemove.getKey()}, user);
+                        showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                        collectionManager.sync();
+                        loadDataFromCollectionManager();
 
-                } else {
-                    showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
+                    }
+
                 }
                 break;
+
             case "remove_greater":
                 DragonDisplayWrapper selectedForRemoveGr = table.getSelectionModel().getSelectedItem();
-                if (selectedForRemoveGr.getOwner().equals(user.getLogin())) {
-                    String response = commandsManager.removeKeyGrDragon(new String[]{selectedForRemoveGr.getKey()}, user);
-                    showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
-                    collectionManager.sync();
-                    loadDataFromCollectionManager();
+                if(selectedForRemoveGr != null){
+                    if (selectedForRemoveGr.getOwner().equals(user.getLogin())) {
+                        String response = commandsManager.removeKeyGrDragon(new String[]{selectedForRemoveGr.getKey()}, user);
+                        showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                        collectionManager.sync();
+                        loadDataFromCollectionManager();
 
-                } else {
-                    showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
+                    }
+
                 }
                 break;
 

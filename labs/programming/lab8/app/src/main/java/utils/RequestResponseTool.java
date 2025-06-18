@@ -1,11 +1,17 @@
 package utils;
 
-import exceptions.WrongRequestException;
-import structs.Packet;
-
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+
+import exceptions.WrongRequestException;
+import structs.Packet;
 
 public class RequestResponseTool {
     static public boolean sendPacket(SocketChannel channel, Packet packet) throws IOException {
@@ -38,27 +44,29 @@ public class RequestResponseTool {
             }
             lengthBuffer.flip();
             int length = lengthBuffer.getInt();
-            ByteBuffer buffer = ByteBuffer.allocate(length);
+                ByteBuffer buffer = ByteBuffer.allocate(length);
+                
 
 
-            while (buffer.hasRemaining()) {
-                if (channel.read(buffer) == -1) {
-                    throw new EOFException("Unexpected end of stream");
+
+                while (buffer.hasRemaining()) {
+                    if (channel.read(buffer) == -1) {
+                        throw new EOFException("Unexpected end of stream");
+                    }
                 }
-            }
 
-            buffer.flip();
+                buffer.flip();
 
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(buffer.array());
-            ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(buffer.array());
+                ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
 
-            Object object = objectInputStream.readObject();
+                Object object = objectInputStream.readObject();
 
-            if (object instanceof Packet) {
-                return (Packet) object;
-            } else {
-                throw new WrongRequestException();
-            }
+                if (object instanceof Packet) {
+                    return (Packet) object;
+                } else {
+                    throw new WrongRequestException();
+                }
         } catch (IOException e) {
             System.out.println("Input/output error: " + e.getMessage());
         } catch (ClassNotFoundException e) {
