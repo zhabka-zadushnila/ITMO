@@ -66,6 +66,10 @@ public class CollectionManager {
         }
     }
 
+    public boolean addElement(Map.Entry<String, Dragon> element) {
+        return addElement(element.getKey(), element.getValue());
+    }
+
     /**
      * Replaces element
      *

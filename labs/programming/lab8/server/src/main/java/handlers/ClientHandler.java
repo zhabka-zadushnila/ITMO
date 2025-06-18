@@ -27,6 +27,7 @@ public class ClientHandler implements Runnable {
         this.writePool = writePool;
     }
 
+
     @Override
     public void run() {
         try {
@@ -39,6 +40,8 @@ public class ClientHandler implements Runnable {
             } catch (IOException e) {
                 logger.fine("Failed to close socket: " + e.getMessage());
             }
+
+
         }
     }
 
