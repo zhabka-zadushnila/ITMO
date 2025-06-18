@@ -344,14 +344,17 @@ public class DragonTableView extends Application {
         switch (commandName) {
 
             case "insert":
+
                 DragonFormScreen insertDialog = new DragonFormScreen();
                 DragonDisplayWrapper newEntry = insertDialog.getNewDragon();
                 if (newEntry != null) {
-                    newEntry.getValue().setOwnerLogin(user.getLogin());
-                    String response = commandsManager.insertDragon(newEntry, user);
-                    showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
-                    collectionManager.sync();
-                    loadDataFromCollectionManager();
+                    if(user!= null) {
+                        newEntry.getValue().setOwnerLogin(user.getLogin());
+                        String response = commandsManager.insertDragon(newEntry, user);
+                        showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                        collectionManager.sync();
+                        loadDataFromCollectionManager();
+                    }
                 }
                 break;
 
