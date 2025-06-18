@@ -1,12 +1,14 @@
 package gui;
 
 import java.time.LocalDate;
+import java.util.Locale;
 import java.util.Map;
 
 import gui.managers.CommandsManager;
 import gui.screens.DragonFormScreen;
 import gui.screens.LoginScreen;
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -17,14 +19,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
@@ -71,11 +66,8 @@ public class DragonTableView extends Application {
     @Override
     public void start(Stage primaryStage) {
         startLogin();
-       /// primaryStage.titleProperty().bind(localeManager.createStringBinding("app.title"));
+        primaryStage.titleProperty().bind(localeManager.createStringBinding("app.title"));
 
-        masterData.addListener((ListChangeListener<DragonDisplayWrapper>) change -> {
-        updateVisualPane(primaryStage);
-        });
 
         if (collectionManager == null) {
             collectionManager = new CollectionManager();
@@ -121,6 +113,7 @@ public class DragonTableView extends Application {
 
         root.setRight(rightBox);
 
+
         loadDataFromCollectionManager();
 
         Scene scene = new Scene(root, 1200, 800);
@@ -142,7 +135,7 @@ public class DragonTableView extends Application {
                 }
             }
         }).start();
-
+        localeManager.localeProperty().addListener((obs, oldVal, newVal) -> table.refresh());
         primaryStage.show();
     }
 
@@ -185,19 +178,30 @@ public class DragonTableView extends Application {
         HBox filterPanel = new HBox(10);
         filterPanel.setPadding(new Insets(10));
         filterPanel.setAlignment(Pos.CENTER_RIGHT);
-        Label filterLabel = new Label("Filter:");
+        Label filterLabel = new Label();
+        filterLabel.textProperty().bind(localeManager.createStringBinding("filter.label"));
         filterField = new TextField();
-        filterField.setPromptText("Type to filter...");
+        filterField.promptTextProperty().bind(localeManager.createStringBinding("filter.prompt"));
 
-        Button refreshButton = new Button("Refresh");
+        Button refreshButton = new Button();
+        refreshButton.textProperty().bind(localeManager.createStringBinding("button.refresh"));
         refreshButton.setOnAction(e -> loadDataFromCollectionManager());
-        filterPanel.getChildren().addAll(filterLabel, filterField, refreshButton);
+
+        ComboBox<Locale> languageSelector = createLanguageSelector();
+
+
+        filterPanel.getChildren().addAll(filterLabel, filterField, refreshButton, languageSelector);
 
 
         HBox userPanel = new HBox(10);
         userPanel.setPadding(new Insets(10));
         userPanel.setAlignment(Pos.CENTER_LEFT);
-        Label userLabel = new Label((user == null) ? "Unregistered" : user.getLogin());
+        Label userLabel = new Label();
+        userLabel.textProperty().bind(Bindings.createStringBinding(() ->
+                        (user == null) ? localeManager.getString("user.unregistered") : user.getLogin(),
+                localeManager.localeProperty()
+        ));
+
         if (user == null) {
             Button registerButton = new Button("Register/Login");
             userPanel.getChildren().addAll(userLabel, registerButton);
@@ -207,6 +211,37 @@ public class DragonTableView extends Application {
         topPanel.setLeft(userPanel);
         topPanel.setRight(filterPanel);
         return topPanel;
+    }
+
+    private ComboBox<Locale> createLanguageSelector() {
+        ComboBox<Locale> languageSelector = new ComboBox<>();
+
+        languageSelector.getItems().add(new Locale("ru", "RU"));
+        languageSelector.getItems().add(new Locale("pl", "PL"));
+        languageSelector.getItems().add(new Locale("is", "IS"));
+        languageSelector.getItems().add(new Locale("en", "IN"));
+
+        languageSelector.setConverter(new javafx.util.StringConverter<Locale>() {
+            @Override
+            public String toString(Locale locale) {
+                if (locale == null) return "";
+                return locale.getDisplayLanguage(locale);
+            }
+            @Override
+            public Locale fromString(String string) {
+                return null;
+            }
+        });
+
+        languageSelector.setValue(localeManager.getLocale());
+
+        languageSelector.valueProperty().addListener((obs, oldLocale, newLocale) -> {
+            if (newLocale != null) {
+                localeManager.setLocale(newLocale);
+            }
+        });
+
+        return languageSelector;
     }
 
     private Pane createRightPannel(Stage primaryStage){
