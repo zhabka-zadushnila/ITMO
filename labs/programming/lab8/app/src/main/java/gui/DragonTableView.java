@@ -59,7 +59,6 @@ public class DragonTableView extends Application {
     private static CollectionManager collectionManager;
     private final ObservableList<DragonDisplayWrapper> masterData = FXCollections.observableArrayList();
     User user = null;
-    Label userLabel;
     private TableView<DragonDisplayWrapper> table = new TableView<>();
     private TextField filterField;
     private CommandsManager commandsManager = new CommandsManager();
@@ -72,8 +71,6 @@ public class DragonTableView extends Application {
     public void start(Stage primaryStage) {
         startLogin();
         primaryStage.setTitle("Dragon Collection Viewer");
-
-
 
         if (collectionManager == null) {
             collectionManager = new CollectionManager();
@@ -123,19 +120,7 @@ public class DragonTableView extends Application {
 
         Scene scene = new Scene(root, 1200, 800);
         primaryStage.setScene(scene);
-        new Thread(() -> {
-            while(true){
-                collectionManager.sync();
-                loadDataFromCollectionManager();
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }).start();
         primaryStage.show();
-
     }
 
     private void startLogin() {
@@ -177,14 +162,13 @@ public class DragonTableView extends Application {
         HBox userPanel = new HBox(10);
         userPanel.setPadding(new Insets(10));
         userPanel.setAlignment(Pos.CENTER_LEFT);
-        userLabel = new Label((user == null) ? "Unregistered" : user.getLogin());
-        Button registerButton = new Button("Register/Login");
-        userPanel.getChildren().addAll(userLabel, registerButton);
-        registerButton.setOnAction(e -> {
-            startLogin();
-            userLabel.setText((user == null) ? "Unregistered" : user.getLogin());
-        });
-
+        Label userLabel = new Label((user == null) ? "Unregistered" : user.getLogin());
+        if (user == null) {
+            Button registerButton = new Button("Register/Login");
+            userPanel.getChildren().addAll(userLabel, registerButton);
+        } else {
+            userPanel.getChildren().add(userLabel);
+        }
         topPanel.setLeft(userPanel);
         topPanel.setRight(filterPanel);
         return topPanel;
@@ -400,97 +384,75 @@ private void attachInfoHandler(Node node, Dragon dragon, Stage primaryStage, Str
         switch (commandName) {
 
             case "insert":
-                if(user!= null) {
-                    DragonFormScreen insertDialog = new DragonFormScreen();
-                    DragonDisplayWrapper newEntry = insertDialog.getNewDragon();
-                    if (newEntry != null) {
-
-                            newEntry.getValue().setOwnerLogin(user.getLogin());
-                            String response = commandsManager.insertDragon(newEntry, user);
-                            showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
-                            collectionManager.sync();
-                            loadDataFromCollectionManager();
-
-                    }
-                } else{
-                    showAlert(Alert.AlertType.WARNING, "Action forbidden", "You must be logged in to do such thing");
+                DragonFormScreen insertDialog = new DragonFormScreen();
+                DragonDisplayWrapper newEntry = insertDialog.getNewDragon();
+                if (newEntry != null) {
+                    newEntry.getValue().setOwnerLogin(user.getLogin());
+                    String response = commandsManager.insertDragon(newEntry, user);
+                    showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                    collectionManager.sync();
+                    loadDataFromCollectionManager();
                 }
                 break;
 
             case "update":
                 DragonDisplayWrapper selectedForUpdate = table.getSelectionModel().getSelectedItem();
-                if(user!= null) {
-                    if (selectedForUpdate.getOwner().equals(user.getLogin())) {
-                        DragonFormScreen updateDialog = new DragonFormScreen();
-                        Dragon newDragon = updateDialog.updateDragon(selectedForUpdate);
-                        newDragon.setOwnerLogin(user.getLogin());
-                        if (newDragon != null) {
-                            collectionManager.replaceElement(selectedForUpdate.getKey(), newDragon);
-                            String response = commandsManager.updateDragon(new DragonDisplayWrapper(selectedForUpdate.getKey(), newDragon), user);
-                            showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
-                            collectionManager.sync();
-                            loadDataFromCollectionManager();
-                        }
-                    } else {
-                        showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
+                if (selectedForUpdate.getOwner().equals(user.getLogin())) {
+                    DragonFormScreen updateDialog = new DragonFormScreen();
+                    Dragon newDragon = updateDialog.updateDragon(selectedForUpdate);
+                    newDragon.setOwnerLogin(user.getLogin());
+                    if (newDragon != null) {
+                        collectionManager.replaceElement(selectedForUpdate.getKey(), newDragon);
+                        String response = commandsManager.updateDragon(new DragonDisplayWrapper(selectedForUpdate.getKey(), newDragon), user);
+                        showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                        collectionManager.sync();
+                        loadDataFromCollectionManager();
                     }
-                } else{
-                    showAlert(Alert.AlertType.WARNING, "Action forbidden", "You must be logged in to do such thing");
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
                 }
                 break;
 
             case "replace_if_lower":
                 DragonDisplayWrapper selectedForReplace = table.getSelectionModel().getSelectedItem();
-                if(user!= null) {
-                    if (selectedForReplace.getOwner().equals(user.getLogin())) {
-                        DragonFormScreen updateDialog = new DragonFormScreen();
-                        Dragon newDragon = updateDialog.updateDragon(selectedForReplace);
-                        newDragon.setOwnerLogin(user.getLogin());
-                        if (newDragon != null) {
-                            collectionManager.replaceElement(selectedForReplace.getKey(), newDragon);
-                            String response = commandsManager.replaceIfLowerDragon(new DragonDisplayWrapper(selectedForReplace.getKey(), newDragon), user);
-                            showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
-                            collectionManager.sync();
-                            loadDataFromCollectionManager();
-                        }
-                    } else {
-                        showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
+                if (selectedForReplace.getOwner().equals(user.getLogin())) {
+                    DragonFormScreen updateDialog = new DragonFormScreen();
+                    Dragon newDragon = updateDialog.updateDragon(selectedForReplace);
+                    newDragon.setOwnerLogin(user.getLogin());
+                    if (newDragon != null) {
+                        collectionManager.replaceElement(selectedForReplace.getKey(), newDragon);
+                        String response = commandsManager.replaceIfLowerDragon(new DragonDisplayWrapper(selectedForReplace.getKey(), newDragon), user);
+                        showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                        collectionManager.sync();
+                        loadDataFromCollectionManager();
                     }
-                } else{
-                    showAlert(Alert.AlertType.WARNING, "Action forbidden", "You must be logged in to do such thing");
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
                 }
                 break;
 
             case "remove_key":
                 DragonDisplayWrapper selectedForRemove = table.getSelectionModel().getSelectedItem();
-                if(user!= null) {
-                    if (selectedForRemove.getOwner().equals(user.getLogin())) {
-                        String response = commandsManager.removeKeyDragon(new String[]{selectedForRemove.getKey()}, user);
-                        showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
-                        collectionManager.sync();
-                        loadDataFromCollectionManager();
+                if (selectedForRemove.getOwner().equals(user.getLogin())) {
+                    String response = commandsManager.removeKeyDragon(new String[]{selectedForRemove.getKey()}, user);
+                    showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                    collectionManager.sync();
+                    loadDataFromCollectionManager();
 
-                    } else {
-                        showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
-                    }
-                } else{
-                    showAlert(Alert.AlertType.WARNING, "Action forbidden", "You must be logged in to do such thing");
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
                 }
                 break;
             case "remove_greater":
                 DragonDisplayWrapper selectedForRemoveGr = table.getSelectionModel().getSelectedItem();
-                if(user!= null) {
-                    if (selectedForRemoveGr.getOwner().equals(user.getLogin())) {
-                        String response = commandsManager.removeKeyGrDragon(new String[]{selectedForRemoveGr.getKey()}, user);
-                        showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
-                        collectionManager.sync();
-                        loadDataFromCollectionManager();
+                if (selectedForRemoveGr.getOwner().equals(user.getLogin())) {
+                    String response = commandsManager.removeKeyGrDragon(new String[]{selectedForRemoveGr.getKey()}, user);
+                    showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                    collectionManager.sync();
+                    loadDataFromCollectionManager();
 
-                    } else {
-                        showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
-                    }
-                } else{
-                    showAlert(Alert.AlertType.WARNING, "Action forbidden", "You must be logged in to do such thing");
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
                 }
                 break;
 
