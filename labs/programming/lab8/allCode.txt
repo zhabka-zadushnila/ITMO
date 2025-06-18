@@ -34,7 +34,97 @@ CREATE TABLE dragons (
         (depth IS NOT NULL AND number_of_treasures IS NOT NULL)
     )
 );
-// ./common/src/main/java/structs/SQLAnswer.java
+// ./common/src/main/java/structs/wrappers/DragonDisplayWrapper.java
+package structs.wrappers;
+
+
+import structs.classes.Dragon;
+
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.stream.Stream;
+
+public class DragonDisplayWrapper implements Serializable {
+    private final String key;
+    private final Dragon originalDragon;
+    private static final long serialVersionUID = 1L;
+
+    public DragonDisplayWrapper(String key, Dragon dragon) {
+        this.key = key;
+        this.originalDragon = dragon;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public String getOwner() {
+        return originalDragon.getOwnerLogin();
+    }
+
+    public String getName() {
+        return originalDragon.getName();
+    }
+
+    public double getX() {
+        return originalDragon.getCoordinates().getX();
+    }
+
+    public long getY() {
+        return originalDragon.getCoordinates().getY();
+    }
+
+    public LocalDate getCreationDate() {
+        return originalDragon.getCreationDate();
+    }
+
+    public int getAge() {
+        return originalDragon.getAge();
+    }
+
+    public String getColor() {
+        return originalDragon.getColor().name();
+    }
+
+    public String getType() {
+        return originalDragon.getType().name();
+    }
+
+    public String getCharacter() {
+        return originalDragon.getCharacter() != null ? originalDragon.getCharacter().name() : "N/A";
+    }
+
+    public Integer getDepth() {
+        return originalDragon.getCave() != null ? originalDragon.getCave().getDepth() : null;
+    }
+
+    public Double getTreasures() {
+        return originalDragon.getCave() != null ? originalDragon.getCave().getNumberOfTreasures() : null;
+    }
+
+    public Dragon getOriginalDragon() {
+        return originalDragon;
+    }
+    public Dragon getValue(){ return  originalDragon;}
+
+
+    public Stream<String> getStreamOfFields() {
+        return Stream.of(
+                getKey(),
+                getOwner(),
+                getName(),
+                String.valueOf(getX()),
+                String.valueOf(getY()),
+                getCreationDate().toString(),
+                String.valueOf(getAge()),
+                getColor(),
+                getType(),
+                getCharacter(),
+                getDepth() != null ? String.valueOf(getDepth()) : "",
+                getTreasures() != null ? String.valueOf(getTreasures()) : ""
+        );
+    }
+}// ./common/src/main/java/structs/SQLAnswer.java
 package structs;
 
 import java.io.Serializable;
@@ -119,6 +209,11 @@ package structs;
 
 import java.io.Serializable;
 import java.util.AbstractMap;
+import java.util.Map;
+
+import structs.classes.Dragon;
+import structs.wrappers.DragonDisplayWrapper;
+
 
 public class Packet implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -128,6 +223,7 @@ public class Packet implements Serializable {
     String[] arguments;
     Object object;
     String text;
+    Map<String, Dragon> map;
 
     public Packet(PacketType packetType, String command, String[] arguments, User user) {
         this(packetType, command, arguments, null, user);
@@ -150,8 +246,17 @@ public class Packet implements Serializable {
         this.user = user;
     }
 
+    public Packet(PacketType packetType, Map<String, Dragon> map){
+        this.map = map;
+        this.packetType = packetType;
+    }
+
     public User getUser() {
         return user;
+    }
+
+    public Map<String, Dragon> getMap(){
+        return map;
     }
 
     public AbstractMap.SimpleEntry<String, Object> getArgsObjectEntry() {
@@ -162,6 +267,10 @@ public class Packet implements Serializable {
         }
 
     }
+
+    public DragonDisplayWrapper getArgsObjectWrapper() {
+        return (DragonDisplayWrapper) object;
+    };
 
     public String getCommand() {
         return command;
@@ -187,6 +296,10 @@ public class Packet implements Serializable {
         return packetType == PacketType.OBJECT_COMMAND;
     }
 
+    public boolean isMap(){
+        return packetType == PacketType.MAP;
+    }
+
 
     @Override
     public String toString() {
@@ -207,28 +320,31 @@ public enum PacketType {
     OBJECT_COMMAND,
     TEXT,
     AUTH,
-    MISC
+    MISC,
+    MAP
 }
 // ./common/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst
 // ./common/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst
 // ./common/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
-/home/zhabka/Documents/labs/programming/lab8/common/src/main/java/structs/Packet.java
-/home/zhabka/Documents/labs/programming/lab8/common/src/main/java/structs/PacketType.java
-/home/zhabka/Documents/labs/programming/lab8/common/src/main/java/structs/SQLAnswer.java
-/home/zhabka/Documents/labs/programming/lab8/common/src/main/java/structs/User.java
-/home/zhabka/Documents/labs/programming/lab8/common/src/main/java/structs/classes/Color.java
-/home/zhabka/Documents/labs/programming/lab8/common/src/main/java/structs/classes/Coordinates.java
-/home/zhabka/Documents/labs/programming/lab8/common/src/main/java/structs/classes/Dragon.java
-/home/zhabka/Documents/labs/programming/lab8/common/src/main/java/structs/classes/DragonCave.java
-/home/zhabka/Documents/labs/programming/lab8/common/src/main/java/structs/classes/DragonCharacter.java
-/home/zhabka/Documents/labs/programming/lab8/common/src/main/java/structs/classes/DragonType.java
-/home/zhabka/Documents/labs/programming/lab8/common/src/main/java/structs/classes/Guarded.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/common/src/main/java/structs/Packet.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/common/src/main/java/structs/PacketType.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/common/src/main/java/structs/SQLAnswer.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/common/src/main/java/structs/User.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/common/src/main/java/structs/classes/Color.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/common/src/main/java/structs/classes/Coordinates.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/common/src/main/java/structs/classes/Dragon.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/common/src/main/java/structs/classes/DragonCave.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/common/src/main/java/structs/classes/DragonCharacter.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/common/src/main/java/structs/classes/DragonType.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/common/src/main/java/structs/classes/Guarded.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/common/src/main/java/structs/wrappers/DragonDisplayWrapper.java
 // ./common/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
 structs/classes/DragonCharacter.class
 structs/PacketType.class
 structs/Packet.class
 structs/classes/Dragon.class
 structs/classes/Guarded.class
+structs/wrappers/DragonDisplayWrapper.class
 structs/SQLAnswer.class
 structs/User.class
 structs/classes/Coordinates.class
@@ -262,10 +378,9 @@ version=v1
 </project>// ./server/src/main/java/utils/TypeComparator.java
 package utils;
 
-import classes.Dragon;
-import classes.DragonType;
-
 import java.util.Comparator;
+
+import structs.classes.Dragon;
 
 /**
  * Simple comparator that is used for default sort method in arrays.
@@ -278,13 +393,14 @@ public class TypeComparator implements Comparator<Dragon> {
 }
 // ./server/src/main/java/utils/RequestConstructor.java
 package utils;
+import java.util.Map;
+import java.util.logging.Logger;
 
 import commands.BasicCommand;
 import structs.Packet;
 import structs.PacketType;
 import structs.User;
-
-import java.util.logging.Logger;
+import structs.classes.Dragon;
 
 public class RequestConstructor {
     private static final Logger logger = Logger.getLogger(RequestConstructor.class.getName());
@@ -301,12 +417,17 @@ public class RequestConstructor {
         logger.fine("Created text request with: " + string);
         return new Packet(PacketType.TEXT, null, null, null, string, null);
     }
+
+    public static Packet createRequest(Map<String, Dragon> collection){
+        return new Packet(PacketType.MAP, collection);
+    }
 }
 // ./server/src/main/java/utils/RequestResponseTool.java
 package utils;
 
 import exceptions.WrongRequestException;
-import structs.Packet;
+import structs.*;
+import structs.wrappers.*;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -369,6 +490,7 @@ public class RequestResponseTool {
             if (object instanceof Packet) {
                 return (Packet) object;
             } else {
+                System.out.println("damn thats bad packet" + object.toString());
                 throw new WrongRequestException();
             }
         } catch (IOException e) {
@@ -521,15 +643,15 @@ public class RemoveKeyCommand extends BasicCommand {
 // ./server/src/main/java/commands/RemoveGreaterKeyCommand.java
 package commands;
 
-import classes.Dragon;
-import exceptions.NullArgsForbiddenException;
-import managers.CollectionManager;
-import structs.User;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import exceptions.NullArgsForbiddenException;
+import managers.CollectionManager;
+import structs.User;
+import structs.classes.Dragon;
 
 /**
  * Removes elements with key greater than this one
@@ -574,15 +696,15 @@ public class RemoveGreaterKeyCommand extends BasicCommand {
 // ./server/src/main/java/commands/RemoveGreaterCommand.java
 package commands;
 
-import classes.Dragon;
-import exceptions.NullArgsForbiddenException;
-import managers.CollectionManager;
-import structs.User;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import exceptions.NullArgsForbiddenException;
+import managers.CollectionManager;
+import structs.User;
+import structs.classes.Dragon;
 
 /**
  * Removes greater elements (gets initial element by id)
@@ -660,11 +782,11 @@ public class ShowCommand extends BasicCommand {
 // ./server/src/main/java/commands/PrintFieldDescendingTypeCommand.java
 package commands;
 
+import java.util.stream.Collectors;
+
 import managers.CollectionManager;
 import structs.User;
 import utils.TypeComparator;
-
-import java.util.stream.Collectors;
 
 /**
  * Outputs id : type
@@ -684,7 +806,7 @@ public class PrintFieldDescendingTypeCommand extends BasicCommand {
     public String execute(Object args, User user) {
         return this.collectionManager.getCollection().values().stream()
                 .sorted(new TypeComparator())
-                .map((dragon) -> dragon.getId() + " : " + dragon.getType().toString() + "\n")
+                .map((dragon) -> dragon.getType().toString() + "\n")
                 .collect(Collectors.joining());
     }
 }
@@ -722,13 +844,13 @@ public class RegisterCommand extends BasicCommand {
 // ./server/src/main/java/commands/PrintAscendingCommand.java
 package commands;
 
-import managers.CollectionManager;
-import structs.User;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import managers.CollectionManager;
+import structs.User;
 
 
 /**
@@ -792,11 +914,11 @@ public class SaveCommand extends BasicCommand {
 // ./server/src/main/java/commands/CountLessThanCharacterCommand.java
 package commands;
 
-import classes.DragonCharacter;
 import exceptions.NoSuchElementException;
 import exceptions.NullArgsForbiddenException;
 import managers.CollectionManager;
 import structs.User;
+import structs.classes.DragonCharacter;
 import utils.InputChecker;
 
 /**
@@ -855,14 +977,15 @@ public class ClearCommand extends BasicCommand {
 // ./server/src/main/java/commands/ReplaceIfLowerCommand.java
 package commands;
 
-import classes.Dragon;
+import java.util.Map;
+
 import exceptions.NoSuchElementException;
 import exceptions.NullArgsForbiddenException;
 import managers.CollectionManager;
 import managers.CommandManager;
 import structs.User;
-
-import java.util.Map;
+import structs.classes.Dragon;
+import structs.wrappers.DragonDisplayWrapper;
 
 
 /**
@@ -885,7 +1008,7 @@ public class ReplaceIfLowerCommand extends BasicCommand {
         if (arguments == null) {
             return "Something strange, seems like you've provided null";
         }
-        Map.Entry<String, Dragon> entry = (Map.Entry<String, Dragon>) arguments;
+        DragonDisplayWrapper entry = (DragonDisplayWrapper) arguments;
         Dragon dragon = entry.getValue();
         if (dragon == null) {
             return "";
@@ -895,10 +1018,9 @@ public class ReplaceIfLowerCommand extends BasicCommand {
         if (collectionManager.hasElement(entry.getKey())) {
 
             if (collectionManager.getElement(entry.getKey()).compareTo(dragon) < 0) {
-                dragon.setId(Dragon.getIdCreator());
-                Dragon.setIdCreator(Dragon.getIdCreator() + 1);
                 if (collectionManager.getDbManager().updateDragon(dragon, entry.getKey(), user.getLogin()).isExpectedBehabiour()) {
                     collectionManager.replaceElement(entry.getKey(), dragon);
+                    return "Successfully replaced an element";
                 }
             } else {
                 return ("New dragon is not less than new one, nothing has changed :)");
@@ -912,14 +1034,15 @@ public class ReplaceIfLowerCommand extends BasicCommand {
 // ./server/src/main/java/commands/UpdateCommand.java
 package commands;
 
-import classes.Dragon;
+import java.util.Map;
+
 import exceptions.NoSuchElementException;
 import exceptions.NullArgsForbiddenException;
 import managers.CollectionManager;
 import managers.CommandManager;
 import structs.User;
-
-import java.util.Map;
+import structs.classes.Dragon;
+import structs.wrappers.DragonDisplayWrapper;
 
 /**
  * Used for updating element with specific id
@@ -938,7 +1061,8 @@ public class UpdateCommand extends BasicCommand {
         if (user == null) {
             return "please register to do such things";
         }
-        Map.Entry<String, Dragon> entry = (Map.Entry<String, Dragon>) arguments;
+
+        DragonDisplayWrapper entry = (DragonDisplayWrapper) arguments;
 
         if (collectionManager.hasElement(entry.getKey())) {
 
@@ -946,7 +1070,6 @@ public class UpdateCommand extends BasicCommand {
                 return "Got null, nothing changes";
             }
             Dragon dragon = entry.getValue();
-            dragon.setId(collectionManager.getElement(entry.getKey()).getId());
             if (!collectionManager.getDbManager().isDragonUsers(entry.getKey(), user.getLogin())) {
                 return "you cannot change someones dragon";
             }
@@ -964,14 +1087,15 @@ public class UpdateCommand extends BasicCommand {
 // ./server/src/main/java/commands/InsertCommand.java
 package commands;
 
-import classes.Dragon;
+import java.util.Map;
+
 import exceptions.NullArgsForbiddenException;
 import managers.CollectionManager;
 import managers.CommandManager;
 import structs.SQLAnswer;
 import structs.User;
-
-import java.util.Map;
+import structs.classes.Dragon;
+import structs.wrappers.DragonDisplayWrapper;
 
 /**
  * Command that is used for adding some stuff in collection. Operates with both {@link CommandManager} and {@link CollectionManager}.
@@ -995,13 +1119,11 @@ public class InsertCommand extends BasicCommand {
             return "Something strange, seems like you've provided null";
         }
 
-        Map.Entry<String, Dragon> entry = (Map.Entry<String, Dragon>) arguments;
+        DragonDisplayWrapper entry = (DragonDisplayWrapper) arguments;
         Dragon dragon = entry.getValue();
         if (entry.getValue() == null) {
             return "";
         }
-        dragon.setId(Dragon.getIdCreator());
-        Dragon.setIdCreator(Dragon.getIdCreator() + 1);
         if (collectionManager.hasElement(entry.getKey())) {
             return "such element already exists, nothing changed";
         } else {
@@ -1290,16 +1412,18 @@ public class InfiniteFileRecursion extends CustomException {
 // ./server/src/main/java/handlers/ClientHandler.java
 package handlers;
 
-import Interpreters.ServerCommandInterpreter;
-import structs.Packet;
-import utils.RequestConstructor;
-import utils.RequestResponseTool;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Logger;
+
+import Interpreters.ServerCommandInterpreter;
+import structs.Packet;
+import structs.classes.Dragon;
+import utils.RequestConstructor;
+import utils.RequestResponseTool;
 
 public class ClientHandler implements Runnable {
     private static final Logger logger = Logger.getLogger(ClientHandler.class.getName());
@@ -1317,6 +1441,7 @@ public class ClientHandler implements Runnable {
         this.writePool = writePool;
     }
 
+
     @Override
     public void run() {
         try {
@@ -1329,6 +1454,8 @@ public class ClientHandler implements Runnable {
             } catch (IOException e) {
                 logger.fine("Failed to close socket: " + e.getMessage());
             }
+
+
         }
     }
 
@@ -1370,10 +1497,15 @@ public class ClientHandler implements Runnable {
 
     private void processRequest(Packet packet, SocketChannel socketChannel) {
         try {
-            String response = serverCommandInterpreter.executeRequest(packet);
-            String result = (response != null) ? response : "Request executed successfully";
+            if(packet.isMap()){
+                writePool.execute(() -> sendResponse(socketChannel, serverCommandInterpreter.getCollectionManager().getCollection()));
+            }else{
+                String response = serverCommandInterpreter.executeRequest(packet);
+                String result = (response != null) ? response : "Request executed successfully";
+                writePool.execute(() -> sendResponse(socketChannel, result));
+            }
 
-            writePool.execute(() -> sendResponse(socketChannel, result));
+            
         } catch (Exception e) {
             logger.severe("Error executing command: " + e.getMessage());
             writePool.execute(() -> sendResponse(socketChannel, "Internal server error"));
@@ -1381,7 +1513,12 @@ public class ClientHandler implements Runnable {
     }
 
     private void sendResponse(SocketChannel socketChannel, String message) {
+        System.out.println("Sending back: " + message);
         Packet responsePacket = RequestConstructor.createRequest(message);
+        RequestResponseTool.sendRequest(socketChannel, responsePacket);
+    }
+    private void sendResponse(SocketChannel socketChannel, Map<String, Dragon> collection) {
+        Packet responsePacket = RequestConstructor.createRequest(collection);
         RequestResponseTool.sendRequest(socketChannel, responsePacket);
     }
 }// ./server/src/main/java/handlers/ProcessingHandler.java
@@ -1585,9 +1722,6 @@ public class CommandManager {
 package managers;
 
 
-import classes.*;
-import structs.SQLAnswer;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
@@ -1595,9 +1729,27 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.sql.*;
+import java.sql.Connection;
 import java.sql.Date;
-import java.util.*;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import structs.SQLAnswer;
+import structs.classes.Color;
+import structs.classes.Coordinates;
+import structs.classes.Dragon;
+import structs.classes.DragonCave;
+import structs.classes.DragonCharacter;
+import structs.classes.DragonType;
 
 public class DBManager {
     String sqlInsert = "INSERT INTO users (login, salt, password) VALUES (?, ?, ?)";
@@ -1953,6 +2105,7 @@ public class DBManager {
                 String characterStr = resultSet.getString("character");
                 Integer depth = resultSet.getObject("depth", Integer.class);
                 Double treasures = resultSet.getObject("number_of_treasures", Double.class);
+                String login = resultSet.getString("login");
 
                 Color color = Color.valueOf(colorStr);
                 DragonType type = DragonType.valueOf(typeStr);
@@ -1964,6 +2117,7 @@ public class DBManager {
                         : null;
 
                 Dragon dragon = new Dragon(name, coordinates, age, color, type, character, cave);
+                dragon.setOwnerLogin(login);
 
                 dragonMap.put(id, dragon);
             }
@@ -2013,7 +2167,7 @@ public class ConnectionManager {
     public void serve() {
         try {
             serverSocketChannel = ServerSocketChannel.open();
-            serverSocketChannel.bind(new InetSocketAddress(port));
+            serverSocketChannel.bind(new InetSocketAddress("0.0.0.0" ,port));
             logger.info("Server started on port " + port);
 
             new Thread(this::handleConsoleInput).start();
@@ -2088,7 +2242,7 @@ public class ConnectionManager {
 }// ./server/src/main/java/managers/CollectionManager.java
 package managers;
 
-import classes.Dragon;
+import structs.classes.Dragon;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -2218,7 +2372,7 @@ public class CollectionManager {
 // ./server/src/main/java/managers/FileManager.java
 package managers;
 
-import classes.Dragon;
+import structs.classes.Dragon;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -2275,14 +2429,18 @@ public class FileManager {
 }
 // ./server/src/main/java/managers/DragonCreationManager.java
 package managers;
-
-import classes.*;
-import exceptions.NullForbiddenException;
-import exceptions.RangeExceededException;
-import utils.InputChecker;
-
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+
+import exceptions.NullForbiddenException;
+import exceptions.RangeExceededException;
+import structs.classes.Color;
+import structs.classes.Coordinates;
+import structs.classes.Dragon;
+import structs.classes.DragonCave;
+import structs.classes.DragonCharacter;
+import structs.classes.DragonType;
+import utils.InputChecker;
 
 /**
  * Basically class that is used only for dragon creation process
@@ -2489,7 +2647,7 @@ class Main {
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
     public static void main(String[] args) {
-        int port = 52946;
+        int port = 52947;
 
         File logDir = new File("logs");
         if (!logDir.exists()) {
@@ -2636,7 +2794,7 @@ public class ServerCommandInterpreter {
                 }
                 if (packet.isObjectCommand()) {
                     logger.info("Server got " + command.getName() + " command");
-                    return command.execute(packet.getArgsObjectEntry(), packet.getUser());
+                    return command.execute(packet.getArgsObjectWrapper(), packet.getUser());
                 }
             } catch (CustomException | FileNotFoundException e) {
                 return e.toString();
@@ -2660,108 +2818,94 @@ public class ServerCommandInterpreter {
 }// ./server/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst
 // ./server/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst
 // ./server/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/Interpreters/ServerCommandInterpreter.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/Main.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/async/AsyncRequestSender.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/classes/Color.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/classes/Coordinates.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/classes/Dragon.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/classes/DragonCave.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/classes/DragonCharacter.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/classes/DragonType.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/classes/Guarded.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/commands/BasicCommand.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/commands/ClearCommand.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/commands/CountLessThanCharacterCommand.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/commands/ExitCommand.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/commands/InfoCommand.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/commands/InsertCommand.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/commands/LoginCommand.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/commands/PrintAscendingCommand.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/commands/PrintFieldDescendingTypeCommand.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/commands/RegisterCommand.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/commands/RemoveGreaterCommand.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/commands/RemoveGreaterKeyCommand.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/commands/RemoveKeyCommand.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/commands/ReplaceIfLowerCommand.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/commands/SaveCommand.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/commands/ShowCommand.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/commands/UpdateCommand.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/exceptions/CustomException.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/exceptions/EmptyRequestException.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/exceptions/InfiniteFileRecursion.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/exceptions/NoSuchColorException.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/exceptions/NoSuchElementException.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/exceptions/NullArgsForbiddenException.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/exceptions/NullForbiddenException.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/exceptions/RangeExceededException.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/exceptions/WrongRequestException.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/handlers/ClientHandler.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/handlers/ProcessingHandler.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/handlers/ReadHandler.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/handlers/ResponseSender.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/managers/CollectionManager.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/managers/CommandManager.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/managers/ConnectionManager.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/managers/DBManager.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/managers/DragonCreationManager.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/managers/FileManager.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/utils/InputChecker.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/utils/RequestConstructor.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/utils/RequestResponseTool.java
-/home/zhabka/Documents/labs/programming/lab8/server/src/main/java/utils/TypeComparator.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/Interpreters/ServerCommandInterpreter.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/Main.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/async/AsyncRequestSender.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/commands/BasicCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/commands/ClearCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/commands/CountLessThanCharacterCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/commands/ExitCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/commands/InfoCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/commands/InsertCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/commands/LoginCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/commands/PrintAscendingCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/commands/PrintFieldDescendingTypeCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/commands/RegisterCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/commands/RemoveGreaterCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/commands/RemoveGreaterKeyCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/commands/RemoveKeyCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/commands/ReplaceIfLowerCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/commands/SaveCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/commands/ShowCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/commands/UpdateCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/exceptions/CustomException.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/exceptions/EmptyRequestException.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/exceptions/InfiniteFileRecursion.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/exceptions/NoSuchColorException.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/exceptions/NoSuchElementException.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/exceptions/NullArgsForbiddenException.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/exceptions/NullForbiddenException.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/exceptions/RangeExceededException.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/exceptions/WrongRequestException.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/handlers/ClientHandler.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/handlers/ProcessingHandler.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/handlers/ReadHandler.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/handlers/ResponseSender.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/managers/CollectionManager.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/managers/CommandManager.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/managers/ConnectionManager.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/managers/DBManager.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/managers/DragonCreationManager.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/managers/FileManager.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/utils/InputChecker.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/utils/RequestConstructor.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/utils/RequestResponseTool.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/server/src/main/java/utils/TypeComparator.java
 // ./server/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
 commands/InsertCommand.class
 commands/InfoCommand.class
 managers/DragonCreationManager.class
-exceptions/NullForbiddenException.class
-classes/Color.class
-exceptions/NoSuchElementException.class
-utils/RequestResponseTool.class
-handlers/ReadHandler.class
-commands/ClearCommand.class
-commands/ExitCommand.class
-classes/DragonCharacter.class
-classes/Dragon.class
-utils/RequestConstructor.class
-exceptions/EmptyRequestException.class
-managers/FileManager$1.class
-exceptions/WrongRequestException.class
-commands/RemoveGreaterKeyCommand.class
-handlers/ClientHandler.class
-commands/ReplaceIfLowerCommand.class
-utils/TypeComparator.class
-exceptions/RangeExceededException.class
-managers/CollectionManager.class
-classes/Coordinates.class
 commands/LoginCommand.class
 handlers/ProcessingHandler.class
 commands/BasicCommand.class
-classes/DragonCave.class
 commands/ShowCommand.class
 Main.class
+exceptions/NullForbiddenException.class
 exceptions/InfiniteFileRecursion.class
 Interpreters/ServerCommandInterpreter.class
 commands/SaveCommand.class
 managers/FileManager.class
-classes/DragonType.class
+exceptions/NoSuchElementException.class
+utils/RequestResponseTool.class
+handlers/ReadHandler.class
+commands/ClearCommand.class
 commands/CountLessThanCharacterCommand.class
 commands/RegisterCommand.class
 async/AsyncRequestSender.class
 commands/RemoveKeyCommand.class
+commands/ExitCommand.class
 managers/DBManager.class
 handlers/ResponseSender.class
-Guarded.class
 exceptions/CustomException.class
 commands/PrintFieldDescendingTypeCommand.class
+utils/RequestConstructor.class
+exceptions/EmptyRequestException.class
 commands/RemoveGreaterCommand.class
+managers/FileManager$1.class
+exceptions/WrongRequestException.class
 managers/CommandManager.class
 commands/UpdateCommand.class
+commands/RemoveGreaterKeyCommand.class
+handlers/ClientHandler.class
 managers/ConnectionManager.class
+commands/ReplaceIfLowerCommand.class
 commands/PrintAscendingCommand.class
 exceptions/NoSuchColorException.class
+utils/TypeComparator.class
 utils/InputChecker.class
+exceptions/RangeExceededException.class
 exceptions/NullArgsForbiddenException.class
+managers/CollectionManager.class
 // ./server/target/maven-archiver/pom.properties
 artifactId=server
 groupId=org.ITMO.s435169
@@ -4472,11 +4616,15 @@ public class TypeComparator implements Comparator<Dragon> {
 // ./app/src/main/java/utils/RequestConstructor.java
 package utils;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import commands.BasicCommand;
 import structs.Packet;
 import structs.PacketType;
 import structs.User;
 import structs.classes.Dragon;
+import structs.wrappers.DragonDisplayWrapper;
 
 public class RequestConstructor {
 
@@ -4488,9 +4636,15 @@ public class RequestConstructor {
         } else if (object instanceof User) {
             return new Packet(PacketType.OBJECT_COMMAND, command.getName(), args, (User) object);
             //was PacketType.AUTH
+        } else if (object instanceof DragonDisplayWrapper){
+            return new Packet(PacketType.OBJECT_COMMAND, command.getName(), args, object, user);
         }
 
         return null;
+    }
+///метод для запроса актуальной версии коллекции
+    public static Packet createRequest(){
+        return new Packet(PacketType.MAP, new TreeMap<>());
     }
 }
 // ./app/src/main/java/utils/RequestResponseTool.java
@@ -5468,8 +5622,8 @@ public class ClientManager {
     static int RECONNECT_TIMEOUT = 2000; //millis
 
     Iterator<String> it;
-    String hostname;
-    int port;
+    String hostname = "188.242.233.237";
+    int port = 25947;
     CommandManager commandManager;
     Set<String> executableFiles = new HashSet<String>();
     boolean fileNotEmpty = true;
@@ -5753,10 +5907,17 @@ public class ConnectionManager {
 // ./app/src/main/java/managers/CollectionManager.java
 package managers;
 
+import structs.Packet;
 import structs.classes.Dragon;
+import utils.RequestConstructor;
+import utils.RequestResponseTool;
 
+import java.io.IOException;
+import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Map;
+
+import javafx.collections.FXCollections;
 
 /**
  * Manager that manages collection
@@ -5764,7 +5925,14 @@ import java.util.Map;
 public class CollectionManager {
 
     private final java.time.LocalDate initTime;
-    Map<String, Dragon> collection = new HashMap<String, Dragon>();
+    Map<String, Dragon> collection = FXCollections.observableHashMap();
+    static int MAX_RECONNECT_ATTEMPTS = 5;
+    static int RECONNECT_TIMEOUT = 2000; //millis
+    String hostname = "188.242.233.237";
+    int port = 52947;
+    SocketChannel channel = ConnectionManager.connectToServer(hostname, port, MAX_RECONNECT_ATTEMPTS, RECONNECT_TIMEOUT);
+
+
 
     /**
      * May be initiated with no specific params
@@ -5819,6 +5987,10 @@ public class CollectionManager {
         }
     }
 
+    public boolean addElement(Map.Entry<String, Dragon> element) {
+        return addElement(element.getKey(), element.getValue());
+    }
+
     /**
      * Replaces element
      *
@@ -5864,6 +6036,22 @@ public class CollectionManager {
         this.collection = collection;
     }
 
+    public void sync(){
+        Packet packet = RequestConstructor.createRequest();
+        try {
+            RequestResponseTool.sendPacket(channel, packet);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        packet = RequestResponseTool.getPacket(channel);
+        if(packet == null){
+            System.out.println("somehow packet in sync is null");
+            return;
+        }
+        Map<String, Dragon> updatedCollection = packet.getMap();
+        this.collection = updatedCollection;
+
+    }
 
 }
 // ./app/src/main/java/managers/FileManager.java
@@ -6172,7 +6360,6 @@ class Main {
         ClientManager clientManager = new ClientManager(it, "localhost", 52946, commandManager);
 
         AppStarter.main(args);
-        clientManager.run();
 
     /*
         "  - help : вывести справку по доступным командам\n" +
@@ -6196,94 +6383,7 @@ class Main {
 
     }
 }
-// ./app/src/main/java/gui/utils/DragonDisplayWrapper.java
-package gui.utils;
-
-
-import structs.classes.Dragon;
-
-import java.time.LocalDate;
-import java.util.stream.Stream;
-
-public class DragonDisplayWrapper {
-    private final String key;
-    private final Dragon originalDragon;
-
-    public DragonDisplayWrapper(String key, Dragon dragon) {
-        this.key = key;
-        this.originalDragon = dragon;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public String getOwner() {
-        return originalDragon.getOwnerLogin();
-    }
-
-    public String getName() {
-        return originalDragon.getName();
-    }
-
-    public double getX() {
-        return originalDragon.getCoordinates().getX();
-    }
-
-    public long getY() {
-        return originalDragon.getCoordinates().getY();
-    }
-
-    public LocalDate getCreationDate() {
-        return originalDragon.getCreationDate();
-    }
-
-    public int getAge() {
-        return originalDragon.getAge();
-    }
-
-    public String getColor() {
-        return originalDragon.getColor().name();
-    }
-
-    public String getType() {
-        return originalDragon.getType().name();
-    }
-
-    public String getCharacter() {
-        return originalDragon.getCharacter() != null ? originalDragon.getCharacter().name() : "N/A";
-    }
-
-    public Integer getDepth() {
-        return originalDragon.getCave() != null ? originalDragon.getCave().getDepth() : null;
-    }
-
-    public Double getTreasures() {
-        return originalDragon.getCave() != null ? originalDragon.getCave().getNumberOfTreasures() : null;
-    }
-
-    public Dragon getOriginalDragon() {
-        return originalDragon;
-    }
-
-    // Метод для Stream API, возвращающий все поля в виде строк
-    public Stream<String> getStreamOfFields() {
-        return Stream.of(
-                getKey(),
-                getOwner(),
-                getName(),
-                String.valueOf(getX()),
-                String.valueOf(getY()),
-                getCreationDate().toString(),
-                String.valueOf(getAge()),
-                getColor(),
-                getType(),
-                getCharacter(),
-                getDepth() != null ? String.valueOf(getDepth()) : "",
-                getTreasures() != null ? String.valueOf(getTreasures()) : ""
-        );
-    }
-}// ./app/src/main/java/gui/AppStarter.java
+// ./app/src/main/java/gui/AppStarter.java
 package gui;
 
 import javafx.application.Application;
@@ -6298,8 +6398,12 @@ public class AppStarter {
 }// ./app/src/main/java/gui/DragonTableView.java
 package gui;
 
+import java.time.LocalDate;
+import java.util.Map;
+
+import gui.managers.CommandsManager;
+import gui.screens.DragonFormScreen;
 import gui.screens.LoginScreen;
-import structs.wrappers.DragonDisplayWrapper;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -6307,36 +6411,48 @@ import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import managers.CollectionManager;
 import structs.User;
-import structs.classes.*;
+import structs.classes.Color;
+import structs.classes.Coordinates;
+import structs.classes.Dragon;
+import structs.classes.DragonCave;
+import structs.classes.DragonCharacter;
+import structs.classes.DragonType;
+import structs.wrappers.DragonDisplayWrapper;
 
-import java.time.LocalDate;
-import java.util.Map;
-import java.util.Optional;
 
-/**
- * ПРИМЕЧАНИЕ: Поскольку классы-сущности (Dragon, Coordinates, и т.д.) не были предоставлены,
- * я создал их базовые версии в конце этого файла для полноты и компилируемости.
- * В вашем реальном проекте вы должны использовать свои собственные классы.
- * <p>
- * Этот класс отображает коллекцию драконов в виде таблицы с возможностью
- * фильтрации, сортировки и выполнения команд.
- */
 public class DragonTableView extends Application {
 
     private static CollectionManager collectionManager;
     private final ObservableList<DragonDisplayWrapper> masterData = FXCollections.observableArrayList();
     User user = null;
+    Label userLabel;
+    private final static int POLL_RATIO = 1000;
     private TableView<DragonDisplayWrapper> table = new TableView<>();
     private TextField filterField;
+    private CommandsManager commandsManager = new CommandsManager();
 
     public static void initialize(CollectionManager cm) {
         collectionManager = cm;
@@ -6346,6 +6462,8 @@ public class DragonTableView extends Application {
     public void start(Stage primaryStage) {
         startLogin();
         primaryStage.setTitle("Dragon Collection Viewer");
+
+
 
         if (collectionManager == null) {
             collectionManager = new CollectionManager();
@@ -6369,18 +6487,69 @@ public class DragonTableView extends Application {
         FlowPane bottomPanel = createBottomPanel();
         root.setBottom(bottomPanel);
 
+        Pane visualPane = createRightPannel(primaryStage); 
+        visualPane.prefWidthProperty().bind(root.widthProperty().multiply(0.475));
+        visualPane.prefHeightProperty().bind(root.heightProperty());
+        visualPane.setStyle(
+            "-fx-border-color: #333333;" +
+            "-fx-border-width: 2;" +
+            "-fx-border-radius: 4;" +
+            "-fx-background-color: white;"
+        );
+
+
+        Label title = new Label("Область визуализации");
+        title.setFont(Font.font("Arial", FontWeight.NORMAL, 14));
+
+        Button updateButton = new Button("Обновить дракона");
+        updateButton.setOnAction(e -> updateDragon());
+
+        VBox rightBox = new VBox(5);
+        rightBox.setAlignment(Pos.TOP_CENTER);
+        rightBox.getChildren().addAll(title, visualPane);
+
+        BorderPane.setMargin(rightBox, new Insets(0, 0, 0, 10)); 
+
+        root.setRight(rightBox);
+
         loadDataFromCollectionManager();
 
         Scene scene = new Scene(root, 1200, 800);
         primaryStage.setScene(scene);
+        new Thread(() -> {
+            while(true){
+                collectionManager.sync();
+                loadDataFromCollectionManager();
+                try {
+                    Thread.sleep(POLL_RATIO);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
         primaryStage.show();
+
     }
 
     private void startLogin() {
         this.user = (new LoginScreen()).start();
     }
 
-
+    private void updateDragon(){
+        DragonDisplayWrapper selectedForUpdate = table.getSelectionModel().getSelectedItem();
+        if (selectedForUpdate.getOwner().equals(user.getLogin())) {
+            DragonFormScreen updateDialog = new DragonFormScreen();
+            Dragon newDragon = updateDialog.updateDragon(selectedForUpdate);
+            newDragon.setOwnerLogin(user.getLogin());
+            if (newDragon != null) {
+                collectionManager.replaceElement(selectedForUpdate.getKey(), newDragon);
+                String response = commandsManager.updateDragon(new DragonDisplayWrapper(selectedForUpdate.getKey(), newDragon), user);
+                showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                collectionManager.sync();
+                loadDataFromCollectionManager();
+            }
+        }
+    }
     private BorderPane createTopPanel() {
         BorderPane topPanel = new BorderPane();
 
@@ -6399,16 +6568,116 @@ public class DragonTableView extends Application {
         HBox userPanel = new HBox(10);
         userPanel.setPadding(new Insets(10));
         userPanel.setAlignment(Pos.CENTER_LEFT);
-        Label userLabel = new Label((user == null) ? "Unregistered" : user.getLogin());
-        if (user == null) {
-            Button registerButton = new Button("Register/Login");
-            userPanel.getChildren().addAll(userLabel, registerButton);
-        } else {
-            userPanel.getChildren().add(userLabel);
-        }
+        userLabel = new Label((user == null) ? "Unregistered" : user.getLogin());
+        Button registerButton = new Button("Register/Login");
+        userPanel.getChildren().addAll(userLabel, registerButton);
+        registerButton.setOnAction(e -> {
+            startLogin();
+            userLabel.setText((user == null) ? "Unregistered" : user.getLogin());
+        });
+
         topPanel.setLeft(userPanel);
         topPanel.setRight(filterPanel);
         return topPanel;
+    }
+
+    private Pane createRightPannel(Stage primaryStage){
+        Pane pane = new Pane();
+        Map<String, Dragon> collection = collectionManager.getCollection();
+        for (Map.Entry<String, Dragon> entry : collection.entrySet()) {
+            Dragon dragon = entry.getValue();
+            Node visualisation = getVisualisation(dragon, primaryStage);
+            pane.getChildren().add(visualisation);
+        }
+        return pane;
+    }
+
+
+    private Node getVisualisation(Dragon dragon, Stage primaryStage){
+        DragonType type = dragon.getType();
+        String ownersLogin = dragon.getOwnerLogin();
+        javafx.scene.paint.Color color = getColorByOwner(ownersLogin);
+        double x = dragon.getCoordinates().getX();
+        double y = dragon.getCoordinates().getY();
+        double correctX = ((101*x) % 500) + 50;
+        double correctY = (y % 600);
+        switch(type){
+            case FIRE -> {
+            Circle figure = new Circle(correctX, correctY, 15);
+            figure.setFill(color);
+            attachInfoHandler(figure, dragon, primaryStage);
+            return figure;
+        }
+        case AIR -> {
+            Polygon figure = new Polygon();
+            figure.getPoints().addAll(
+                correctX, correctY - 20,
+                correctX - 15, correctY + 15,
+                correctX + 15, correctY + 15
+            );
+            figure.setFill(color);
+            attachInfoHandler(figure, dragon, primaryStage);
+            return figure;
+        }
+        case WATER -> {
+            Polygon figure = new Polygon();
+            figure.getPoints().addAll(
+                correctX, correctY - 20,
+                correctX - 15, correctY,
+                correctX, correctY + 20,
+                correctX + 15, correctY
+            );
+            figure.setFill(color);
+            attachInfoHandler(figure, dragon, primaryStage);
+            return figure;
+
+        }
+        case UNDERGROUND -> {
+            Rectangle figure = new Rectangle(correctX - 15, correctY - 15, 30, 30);
+            figure.setFill(color);
+            attachInfoHandler(figure, dragon, primaryStage);
+            return figure;
+        }default ->{
+            Circle figure = new Circle();
+            figure.setFill(color);
+            attachInfoHandler(figure, dragon, primaryStage);
+            return figure;
+        }
+        }
+
+
+    }
+
+    private javafx.scene.paint.Color getColorByOwner(String login){
+        int hash = Math.abs(login.hashCode());
+        double hue = (hash*44) % 360;
+        double saturation = 0.7;
+        double brightness = 0.9;
+        return javafx.scene.paint.Color.hsb(hue, saturation, brightness);
+    }
+
+    private void attachInfoHandler(Node node, Dragon dragon, Stage primaryStage) {
+        node.setOnMouseClicked(event -> {
+            Alert info = new Alert(Alert.AlertType.INFORMATION);
+            info.initOwner(primaryStage);
+            info.setTitle("Информация о драконе");
+            info.setHeaderText(dragon.getName() + " (" + dragon.getOwnerLogin() + ")");
+            StringBuilder content = new StringBuilder();
+            content.append("Имя: ").append(dragon.getName()).append("\n")
+                   .append("Координаты: (")
+                    .append(dragon.getCoordinates().getX()).append(", ")
+                    .append(dragon.getCoordinates().getY()).append(")\n")
+                   .append("Возраст: ").append(dragon.getAge()).append("\n")
+                   .append("Тип: ").append(dragon.getType()).append("\n")
+                   .append("Характер: ").append(dragon.getCharacter());
+            if (dragon.getCave() != null) {
+                content.append("\nПещера: ")
+                       .append(dragon.getCave().getNumberOfTreasures())
+                       .append(" сокровищ");
+            }
+            info.setContentText(content.toString());
+            info.showAndWait();
+        });
     }
 
     private void setupTable() {
@@ -6474,10 +6743,10 @@ public class DragonTableView extends Application {
 
     private FlowPane createBottomPanel() {
         FlowPane bottomPanel = new FlowPane();
-        bottomPanel.setPadding(new Insets(10));
+        bottomPanel.setPadding(new Insets(10, 10, 10, 120));
         bottomPanel.setHgap(10);
         bottomPanel.setVgap(10);
-        bottomPanel.setAlignment(Pos.CENTER);
+        bottomPanel.setAlignment(Pos.CENTER_LEFT);
 
         String[] commandNames = {"info", "show", "insert", "update", "remove_key", "remove_greater", "replace_if_lower"};
 
@@ -6497,58 +6766,103 @@ public class DragonTableView extends Application {
         switch (commandName) {
 
             case "insert":
-                DragonFormScreen insertDialog = new DragonFormScreen();
+                if(user!= null) {
+                    DragonFormScreen insertDialog = new DragonFormScreen();
+                    DragonDisplayWrapper newEntry = insertDialog.getNewDragon();
+                    if (newEntry != null) {
 
-                insertResult.ifPresent(dragon -> {
+                            newEntry.getValue().setOwnerLogin(user.getLogin());
+                            String response = commandsManager.insertDragon(newEntry, user);
+                            showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                            collectionManager.sync();
+                            loadDataFromCollectionManager();
 
-                    TextInputDialog keyDialog = new TextInputDialog("new_key");
-                    keyDialog.setTitle("Insert Dragon");
-                    keyDialog.setHeaderText("Enter the key for the new dragon.");
-                    keyDialog.setContentText("Key:");
-                    Optional<String> keyResult = keyDialog.showAndWait();
-                    keyResult.ifPresent(key -> {
-                        System.out.println("Executing insert with key: " + key + " and dragon: " + dragon.getName());
-                        // collectionManager.addElement(key, dragon);
-                        // loadDataFromCollectionManager();
-                    });
-                });
-                break;
-            /*
-            case "update":
-            case "replace_if_lower":
-                DragonDisplayWrapper selectedForUpdate = table.getSelectionModel().getSelectedItem();
-                if (selectedForUpdate == null) {
-                    showAlert(Alert.AlertType.WARNING, "No Selection", "Please select a dragon in the table to " + commandName + ".");
-                    return;
+                    }
+                } else{
+                    showAlert(Alert.AlertType.WARNING, "Action forbidden", "You must be logged in to do such thing");
                 }
-                DragonFormDialog updateDialog = new DragonFormDialog(selectedForUpdate.getOriginalDragon());
-                Optional<Dragon> updateResult = updateDialog.showAndWait();
-                updateResult.ifPresent(dragon -> {
-                    System.out.println("Executing " + commandName + " on key: " + selectedForUpdate.getKey());
-                    // collectionManager.replaceElement(selectedForUpdate.getKey(), dragon);
-                    // loadDataFromCollectionManager();
-                });
+                break;
+
+            case "update":
+                DragonDisplayWrapper selectedForUpdate = table.getSelectionModel().getSelectedItem();
+                if(user!= null) {
+                    if (selectedForUpdate.getOwner().equals(user.getLogin())) {
+                        DragonFormScreen updateDialog = new DragonFormScreen();
+                        Dragon newDragon = updateDialog.updateDragon(selectedForUpdate);
+                        newDragon.setOwnerLogin(user.getLogin());
+                        if (newDragon != null) {
+                            collectionManager.replaceElement(selectedForUpdate.getKey(), newDragon);
+                            String response = commandsManager.updateDragon(new DragonDisplayWrapper(selectedForUpdate.getKey(), newDragon), user);
+                            showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                            collectionManager.sync();
+                            loadDataFromCollectionManager();
+                        }
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
+                    }
+                } else{
+                    showAlert(Alert.AlertType.WARNING, "Action forbidden", "You must be logged in to do such thing");
+                }
+                break;
+
+            case "replace_if_lower":
+                DragonDisplayWrapper selectedForReplace = table.getSelectionModel().getSelectedItem();
+                if(user!= null) {
+                    if (selectedForReplace.getOwner().equals(user.getLogin())) {
+                        DragonFormScreen updateDialog = new DragonFormScreen();
+                        Dragon newDragon = updateDialog.updateDragon(selectedForReplace);
+                        newDragon.setOwnerLogin(user.getLogin());
+                        if (newDragon != null) {
+                            collectionManager.replaceElement(selectedForReplace.getKey(), newDragon);
+                            String response = commandsManager.replaceIfLowerDragon(new DragonDisplayWrapper(selectedForReplace.getKey(), newDragon), user);
+                            showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                            collectionManager.sync();
+                            loadDataFromCollectionManager();
+                        }
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
+                    }
+                } else{
+                    showAlert(Alert.AlertType.WARNING, "Action forbidden", "You must be logged in to do such thing");
+                }
                 break;
 
             case "remove_key":
+                DragonDisplayWrapper selectedForRemove = table.getSelectionModel().getSelectedItem();
+                if(user!= null) {
+                    if (selectedForRemove.getOwner().equals(user.getLogin())) {
+                        String response = commandsManager.removeKeyDragon(new String[]{selectedForRemove.getKey()}, user);
+                        showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                        collectionManager.sync();
+                        loadDataFromCollectionManager();
+
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
+                    }
+                } else{
+                    showAlert(Alert.AlertType.WARNING, "Action forbidden", "You must be logged in to do such thing");
+                }
+                break;
             case "remove_greater":
-                DragonDisplayWrapper selectedForKey = table.getSelectionModel().getSelectedItem();
-                String initialKey = (selectedForKey != null) ? selectedForKey.getKey() : "";
-                TextInputDialog removeDialog = new TextInputDialog(initialKey);
-                removeDialog.setTitle("Input Required");
-                removeDialog.setHeaderText("Enter the key for command: " + commandName);
-                removeDialog.setContentText("Key:");
-                Optional<String> removeResult = removeDialog.showAndWait();
-                removeResult.ifPresent(key -> {
-                    System.out.println("Executing " + commandName + " with key: " + key);
-                    // collectionManager.killElement(key);
-                    // loadDataFromCollectionManager();
-                });
+                DragonDisplayWrapper selectedForRemoveGr = table.getSelectionModel().getSelectedItem();
+                if(user!= null) {
+                    if (selectedForRemoveGr.getOwner().equals(user.getLogin())) {
+                        String response = commandsManager.removeKeyGrDragon(new String[]{selectedForRemoveGr.getKey()}, user);
+                        showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                        collectionManager.sync();
+                        loadDataFromCollectionManager();
+
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
+                    }
+                } else{
+                    showAlert(Alert.AlertType.WARNING, "Action forbidden", "You must be logged in to do such thing");
+                }
                 break;
 
-
-            */
             case "info":
+                collectionManager.sync();
+                loadDataFromCollectionManager();
                 Map<String, Object> info = collectionManager.getCollectionInfoMap();
                 showAlert(Alert.AlertType.INFORMATION, "Collection Info",
                         "Type: " + info.get("Type") + "\n" +
@@ -6559,6 +6873,7 @@ public class DragonTableView extends Application {
             case "show":
             default:
                 System.out.println("Displaying current collection state.");
+                collectionManager.sync();
                 loadDataFromCollectionManager();
                 break;
         }
@@ -6605,8 +6920,8 @@ public class ActionsManager {
 
     static int MAX_RECONNECT_ATTEMPTS = 5;
     static int RECONNECT_TIMEOUT = 2000; //millis
-    String hostname = "localhost";
-    int port = 52946;
+    String hostname = "188.242.233.237";
+    int port = 52947;
     SocketChannel channel = ConnectionManager.connectToServer(hostname, port, MAX_RECONNECT_ATTEMPTS, RECONNECT_TIMEOUT);
 
 
@@ -6624,6 +6939,9 @@ public class ActionsManager {
 // ./app/src/main/java/gui/managers/AuthManager.java
 package gui.managers;
 
+import java.io.IOException;
+import java.nio.channels.SocketChannel;
+
 import commands.server.LoginCommand;
 import commands.server.RegisterCommand;
 import managers.ConnectionManager;
@@ -6632,15 +6950,12 @@ import structs.User;
 import utils.RequestConstructor;
 import utils.RequestResponseTool;
 
-import java.io.IOException;
-import java.nio.channels.SocketChannel;
-
 public class AuthManager {
 
     static int MAX_RECONNECT_ATTEMPTS = 5;
     static int RECONNECT_TIMEOUT = 2000; //millis
-    String hostname = "localhost";
-    int port = 52946;
+    String hostname = "188.242.233.237";
+    int port = 52947;
     SocketChannel channel = ConnectionManager.connectToServer(hostname, port, MAX_RECONNECT_ATTEMPTS, RECONNECT_TIMEOUT);
 
     public AuthManager() {
@@ -6653,6 +6968,18 @@ public class AuthManager {
     }
 
     public boolean login(String login, String password) {
+        if(login == null){
+            return false;
+        }
+        if (login.trim().isBlank()) {
+            return false;
+        }
+        if(password == null){
+            return false;
+        }
+        if (password.trim().isBlank()) {
+            return false;
+        }
         Packet packet = RequestConstructor.createRequest(new LoginCommand(null), null, new User(login, password), null);
         try {
             RequestResponseTool.sendPacket(channel, packet);
@@ -6671,6 +6998,18 @@ public class AuthManager {
     }
 
     public boolean register(String login, String password) {
+        if(login == null){
+            return false;
+        }
+        if (login.trim().isBlank()) {
+            return false;
+        }
+        if(password == null){
+            return false;
+        }
+        if (password.trim().isBlank()) {
+            return false;
+        }
         SocketChannel channel = ConnectionManager.connectToServer(hostname, port, MAX_RECONNECT_ATTEMPTS, RECONNECT_TIMEOUT);
         Packet packet = RequestConstructor.createRequest(new RegisterCommand(null), null, new User(login, password), null);
         try {
@@ -6689,6 +7028,114 @@ public class AuthManager {
         }
     }
 
+}
+// ./app/src/main/java/gui/managers/CommandsManager.java
+package gui.managers;
+
+import commands.server.*;
+import managers.ConnectionManager;
+import structs.Packet;
+import structs.User;
+import structs.classes.Dragon;
+import structs.wrappers.DragonDisplayWrapper;
+import utils.RequestConstructor;
+import utils.RequestResponseTool;
+
+import java.io.IOException;
+import java.nio.channels.SocketChannel;
+import java.util.Map;
+
+public class CommandsManager {
+
+    static int MAX_RECONNECT_ATTEMPTS = 5;
+    static int RECONNECT_TIMEOUT = 2000; //millis
+    String hostname = "188.242.233.237";
+    int port = 52947;
+    SocketChannel channel = ConnectionManager.connectToServer(hostname, port, MAX_RECONNECT_ATTEMPTS, RECONNECT_TIMEOUT);
+
+    public CommandsManager() {
+    }
+
+
+    public CommandsManager(String hostname, int port) {
+        this.hostname = hostname;
+        this.port = port;
+    }
+
+    public String insertDragon(DragonDisplayWrapper dragonEntry, User user) {
+        Packet packet = RequestConstructor.createRequest(new InsertCommand(null, null), null, dragonEntry, user);
+        try {
+            RequestResponseTool.sendPacket(channel, packet);
+        } catch (IOException ex) {
+            return "Some troubles";
+        }
+        packet = RequestResponseTool.getPacket(channel);
+        if (packet.isText()) {
+            return packet.getText();
+        } else {
+            return "Response is not text";
+        }
+    }
+
+    public String updateDragon(DragonDisplayWrapper dragonEntry, User user) {
+        Packet packet = RequestConstructor.createRequest(new UpdateCommand(null, null), null, dragonEntry, user);
+        try {
+            RequestResponseTool.sendPacket(channel, packet);
+        } catch (IOException ex) {
+            return "Some troubles";
+        }
+        packet = RequestResponseTool.getPacket(channel);
+        if (packet.isText()) {
+            return packet.getText();
+        } else {
+            return "Response is not text";
+        }
+    }
+
+    public String replaceIfLowerDragon(DragonDisplayWrapper dragonEntry, User user) {
+        Packet packet = RequestConstructor.createRequest(new ReplaceIfLowerCommand(null, null), null, dragonEntry, user);
+        try {
+            RequestResponseTool.sendPacket(channel, packet);
+        } catch (IOException ex) {
+            return "Some troubles";
+        }
+        packet = RequestResponseTool.getPacket(channel);
+        if (packet.isText()) {
+            return packet.getText();
+        } else {
+            return "Response is not text";
+        }
+    }
+
+    public String removeKeyDragon(String[] args, User user) {
+        Packet packet = RequestConstructor.createRequest(new RemoveKeyCommand(null), args, null, user);
+        try {
+            RequestResponseTool.sendPacket(channel, packet);
+        } catch (IOException ex) {
+            return "Some troubles";
+        }
+        packet = RequestResponseTool.getPacket(channel);
+        if (packet.isText()) {
+            return packet.getText();
+        } else {
+            return "Response is not text";
+        }
+    }
+
+    public String removeKeyGrDragon(String[] args, User user) {
+        Packet packet = RequestConstructor.createRequest(new RemoveGreaterKeyCommand(null), args, null, user);
+        try {
+            RequestResponseTool.sendPacket(channel, packet);
+        } catch (IOException ex) {
+            return "Some troubles";
+        }
+        packet = RequestResponseTool.getPacket(channel);
+        if (packet.isText()) {
+            return packet.getText();
+        } else {
+            return "Response is not text";
+        }
+    }
 }
 // ./app/src/main/java/gui/screens/InfoScreen.java
 package gui.screens;
@@ -6848,116 +7295,421 @@ public class LoginScreen {
 }// ./app/src/main/java/gui/screens/DragonFormScreen.java
 package gui.screens;
 
-import structs.classes.Dragon;
+import structs.wrappers.DragonDisplayWrapper;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import structs.classes.*;
+
+import java.util.Map;
 
 public class DragonFormScreen {
 
-    public Dragon getNewDragon() {
-        // starts stage, that gets a dragon as an input
+    private Dragon resultDragon = null;
+    private DragonDisplayWrapper resultEntry = null;
+
+    public DragonDisplayWrapper getNewDragon() {
+        this.resultEntry = null;
+        showEntryForm("Create New Dragon");
+        return this.resultEntry;
     }
 
-    public Dragon updateDragon(Dragon dragon) {
-        // opens same Form as in getNewDragon, but all the data is preinserted
+    public Dragon updateDragon(DragonDisplayWrapper dragonWrapper) {
+        this.resultDragon = null;
+        showDragonForm("Update Dragon: " + dragonWrapper.getKey(), dragonWrapper.getOriginalDragon());
+        return this.resultDragon;
     }
 
-}
-// ./app/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst
+    private void showDragonForm(String title, Dragon existingDragon) {
+        Stage dialogStage = new Stage();
+        dialogStage.initModality(Modality.APPLICATION_MODAL);
+        dialogStage.setTitle(title);
+
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(20));
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        TextField nameField = new TextField();
+        TextField xField = new TextField();
+        TextField yField = new TextField();
+        TextField ageField = new TextField();
+        ComboBox<Color> colorBox = new ComboBox<>();
+        colorBox.getItems().setAll(Color.values());
+        ComboBox<DragonType> typeBox = new ComboBox<>();
+        typeBox.getItems().setAll(DragonType.values());
+        ComboBox<DragonCharacter> characterBox = new ComboBox<>();
+        characterBox.getItems().setAll(DragonCharacter.values());
+        characterBox.setPromptText("Select a character (optional)");
+
+        CheckBox hasCaveCheck = new CheckBox();
+        TextField depthField = new TextField();
+        TextField treasuresField = new TextField();
+
+        depthField.disableProperty().bind(hasCaveCheck.selectedProperty().not());
+        treasuresField.disableProperty().bind(hasCaveCheck.selectedProperty().not());
+
+        grid.add(new Label("Name:"), 0, 0);
+        grid.add(nameField, 1, 0);
+        grid.add(new Label("Coordinate X:"), 0, 1);
+        grid.add(xField, 1, 1);
+        grid.add(new Label("Coordinate Y:"), 0, 2);
+        grid.add(yField, 1, 2);
+        grid.add(new Label("Age:"), 0, 3);
+        grid.add(ageField, 1, 3);
+        grid.add(new Label("Color:"), 0, 4);
+        grid.add(colorBox, 1, 4);
+        grid.add(new Label("Type:"), 0, 5);
+        grid.add(typeBox, 1, 5);
+        grid.add(new Label("Character:"), 0, 6);
+        grid.add(characterBox, 1, 6);
+        grid.add(new Label("Has Cave:"), 0, 7);
+        grid.add(hasCaveCheck, 1, 7);
+        grid.add(new Label("Cave Depth:"), 0, 8);
+        grid.add(depthField, 1, 8);
+        grid.add(new Label("Cave Treasures:"), 0, 9);
+        grid.add(treasuresField, 1, 9);
+
+        if (existingDragon != null) {
+            nameField.setText(existingDragon.getName());
+            xField.setText(String.valueOf(existingDragon.getCoordinates().getX()));
+            yField.setText(String.valueOf(existingDragon.getCoordinates().getY()));
+            ageField.setText(String.valueOf(existingDragon.getAge()));
+            colorBox.setValue(existingDragon.getColor());
+            typeBox.setValue(existingDragon.getType());
+            characterBox.setValue(existingDragon.getCharacter());
+
+            if (existingDragon.getCave() != null) {
+                hasCaveCheck.setSelected(true);
+                depthField.setText(String.valueOf(existingDragon.getCave().getDepth()));
+                treasuresField.setText(String.valueOf(existingDragon.getCave().getNumberOfTreasures()));
+            }
+        } else {
+            colorBox.getSelectionModel().selectFirst();
+            typeBox.getSelectionModel().selectFirst();
+        }
+
+        Button okButton = new Button("OK");
+        Button cancelButton = new Button("Cancel");
+
+        okButton.setOnAction(e -> {
+            if (validateAndCreateDragon(nameField, xField, yField, ageField, colorBox, typeBox, characterBox, hasCaveCheck, depthField, treasuresField)) {
+                dialogStage.close();
+            }
+        });
+
+        cancelButton.setOnAction(e -> dialogStage.close());
+
+        HBox buttonBox = new HBox(10, cancelButton, okButton);
+        buttonBox.setAlignment(Pos.CENTER_RIGHT);
+        grid.add(buttonBox, 1, 10);
+
+        Scene scene = new Scene(grid);
+        dialogStage.setScene(scene);
+        dialogStage.showAndWait();
+    }
+
+    private void showEntryForm(String title) {
+        Stage dialogStage = new Stage();
+        dialogStage.initModality(Modality.APPLICATION_MODAL);
+        dialogStage.setTitle(title);
+
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(20));
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        TextField idField = new TextField();
+        TextField nameField = new TextField();
+        TextField xField = new TextField();
+        TextField yField = new TextField();
+        TextField ageField = new TextField();
+        ComboBox<Color> colorBox = new ComboBox<>();
+        colorBox.getItems().setAll(Color.values());
+        ComboBox<DragonType> typeBox = new ComboBox<>();
+        typeBox.getItems().setAll(DragonType.values());
+        ComboBox<DragonCharacter> characterBox = new ComboBox<>();
+        characterBox.getItems().setAll(DragonCharacter.values());
+
+        CheckBox hasCaveCheck = new CheckBox();
+        TextField depthField = new TextField();
+        TextField treasuresField = new TextField();
+
+        depthField.disableProperty().bind(hasCaveCheck.selectedProperty().not());
+        treasuresField.disableProperty().bind(hasCaveCheck.selectedProperty().not());
+
+        grid.add(new Label("Key:"), 0, 0);
+        grid.add(idField, 1, 0);
+        grid.add(new Label("Name:"), 0, 1);
+        grid.add(nameField, 1, 1);
+        grid.add(new Label("Coordinate X:"), 0, 2);
+        grid.add(xField, 1, 2);
+        grid.add(new Label("Coordinate Y:"), 0, 3);
+        grid.add(yField, 1, 3);
+        grid.add(new Label("Age:"), 0, 4);
+        grid.add(ageField, 1, 4);
+        grid.add(new Label("Color:"), 0, 5);
+        grid.add(colorBox, 1, 5);
+        grid.add(new Label("Type:"), 0, 6);
+        grid.add(typeBox, 1, 6);
+        grid.add(new Label("Character:"), 0, 7);
+        grid.add(characterBox, 1, 7);
+        grid.add(new Label("Has Cave:"), 0, 8);
+        grid.add(hasCaveCheck, 1, 8);
+        grid.add(new Label("Cave Depth:"), 0, 9);
+        grid.add(depthField, 1, 9);
+        grid.add(new Label("Cave Treasures:"), 0, 10);
+        grid.add(treasuresField, 1, 10);
+
+
+        colorBox.getSelectionModel().selectFirst();
+        typeBox.getSelectionModel().selectFirst();
+        characterBox.getSelectionModel().selectFirst();
+
+        Button okButton = new Button("OK");
+        Button cancelButton = new Button("Cancel");
+
+        okButton.setOnAction(e -> {
+            if (validateAndCreateEntry(idField, nameField, xField, yField, ageField, colorBox, typeBox, characterBox, hasCaveCheck, depthField, treasuresField)) {
+                dialogStage.close();
+            }
+        });
+
+        cancelButton.setOnAction(e -> dialogStage.close());
+
+        HBox buttonBox = new HBox(10, cancelButton, okButton);
+        buttonBox.setAlignment(Pos.CENTER_RIGHT);
+        grid.add(buttonBox, 1, 11);
+
+        Scene scene = new Scene(grid);
+        dialogStage.setScene(scene);
+        dialogStage.showAndWait();
+    }
+
+
+    private boolean validateAndCreateDragon(TextField nameField, TextField xField, TextField yField, TextField ageField,
+                                            ComboBox<Color> colorBox, ComboBox<DragonType> typeBox, ComboBox<DragonCharacter> characterBox,
+                                            CheckBox hasCaveCheck, TextField depthField, TextField treasuresField) {
+        try {
+            String name = nameField.getText();
+            if (name == null || name.trim().isEmpty()) {
+                throw new IllegalArgumentException("Name cannot be empty.");
+            }
+
+            double x = Double.parseDouble(xField.getText().trim());
+            long y = Long.parseLong(yField.getText().trim());
+            if (y > 984) {
+                throw new IllegalArgumentException("Y coordinate cannot be greater than 984.");
+            }
+            Coordinates coordinates = new Coordinates(x, y);
+
+            int age = Integer.parseInt(ageField.getText().trim());
+            if (age <= 0) {
+                throw new IllegalArgumentException("Age must be greater than 0.");
+            }
+
+            Color color = colorBox.getValue();
+            if (color == null) throw new IllegalArgumentException("A color must be selected.");
+
+            DragonType type = typeBox.getValue();
+            if (type == null) throw new IllegalArgumentException("A type must be selected.");
+            DragonCharacter character = characterBox.getValue();
+
+            DragonCave cave = null;
+            if (hasCaveCheck.isSelected()) {
+                if (depthField.getText().trim().isEmpty() || treasuresField.getText().trim().isEmpty()) {
+                    throw new IllegalArgumentException("If a cave exists, both depth and treasures must be specified.");
+                }
+                int depth = Integer.parseInt(depthField.getText().trim());
+                double treasures = Double.parseDouble(treasuresField.getText().trim());
+                if (treasures <= 0) {
+                    throw new IllegalArgumentException("Number of treasures must be greater than 0.");
+                }
+                cave = new DragonCave(depth, treasures);
+            }
+
+            this.resultDragon = new Dragon(name, coordinates, age, color, type, character, cave);
+            return true;
+
+        } catch (NumberFormatException nfe) {
+            showAlert("Invalid Input", "Please enter valid numbers for the numeric fields (X, Y, Age, Depth, Treasures).");
+            return false;
+        } catch (IllegalArgumentException iae) {
+            showAlert("Invalid Input", iae.getMessage());
+            return false;
+        }
+    }
+
+    private boolean validateAndCreateEntry(TextField idField, TextField nameField, TextField xField, TextField yField, TextField ageField,
+                                           ComboBox<Color> colorBox, ComboBox<DragonType> typeBox, ComboBox<DragonCharacter> characterBox,
+                                           CheckBox hasCaveCheck, TextField depthField, TextField treasuresField) {
+        try {
+            String id = idField.getText();
+            if (id == null || id.trim().isEmpty()) {
+                throw new IllegalArgumentException("Id cannot be empty.");
+            }
+
+            String name = nameField.getText();
+            if (name == null || name.trim().isEmpty()) {
+                throw new IllegalArgumentException("Name cannot be empty.");
+            }
+
+            double x = Double.parseDouble(xField.getText().trim());
+            long y = Long.parseLong(yField.getText().trim());
+            if (y > 984) {
+                throw new IllegalArgumentException("Y coordinate cannot be greater than 984.");
+            }
+            Coordinates coordinates = new Coordinates(x, y);
+
+            int age = Integer.parseInt(ageField.getText().trim());
+            if (age <= 0) {
+                throw new IllegalArgumentException("Age must be greater than 0.");
+            }
+
+            Color color = colorBox.getValue();
+            if (color == null) throw new IllegalArgumentException("A color must be selected.");
+
+            DragonType type = typeBox.getValue();
+            if (type == null) throw new IllegalArgumentException("A type must be selected.");
+            DragonCharacter character = characterBox.getValue();
+
+            DragonCave cave = null;
+            if (hasCaveCheck.isSelected()) {
+                if (depthField.getText().trim().isEmpty() || treasuresField.getText().trim().isEmpty()) {
+                    throw new IllegalArgumentException("If a cave exists, both depth and treasures must be specified.");
+                }
+                int depth = Integer.parseInt(depthField.getText().trim());
+                double treasures = Double.parseDouble(treasuresField.getText().trim());
+                if (treasures <= 0) {
+                    throw new IllegalArgumentException("Number of treasures must be greater than 0.");
+                }
+                cave = new DragonCave(depth, treasures);
+            }
+
+            this.resultEntry = new DragonDisplayWrapper(id, new Dragon(name, coordinates, age, color, type, character, cave));
+            return true;
+
+        } catch (NumberFormatException nfe) {
+            showAlert("Invalid Input", "Please enter valid numbers for the numeric fields (X, Y, Age, Depth, Treasures).");
+            return false;
+        } catch (IllegalArgumentException iae) {
+            showAlert("Invalid Input", iae.getMessage());
+            return false;
+        }
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+}// ./app/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst
 // ./app/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst
 // ./app/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/Main.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/commands/BasicCommand.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/commands/local/ExecuteScriptCommand.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/commands/local/ExitCommand.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/commands/local/HelpCommand.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/commands/server/ClearCommand.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/commands/server/CountLessThanCharacterCommand.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/commands/server/InfoCommand.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/commands/server/InsertCommand.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/commands/server/LoginCommand.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/commands/server/PrintAscendingCommand.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/commands/server/PrintFieldDescendingTypeCommand.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/commands/server/RegisterCommand.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/commands/server/RemoveGreaterCommand.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/commands/server/RemoveGreaterKeyCommand.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/commands/server/RemoveKeyCommand.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/commands/server/ReplaceIfLowerCommand.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/commands/server/ShowCommand.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/commands/server/UpdateCommand.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/exceptions/ConnectionInterruptedException.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/exceptions/CustomException.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/exceptions/InfiniteFileRecursion.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/exceptions/NoSuchColorException.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/exceptions/NoSuchElementException.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/exceptions/NullArgsForbiddenException.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/exceptions/NullForbiddenException.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/exceptions/RangeExceededException.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/exceptions/WrongRequestException.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/gui/AppStarter.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/gui/DragonTableView.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/gui/managers/ActionsManager.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/gui/managers/AuthManager.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/gui/screens/InfoScreen.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/gui/screens/LoginScreen.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/gui/utils/DragonDisplayWrapper.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/managers/ClientManager.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/managers/CollectionManager.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/managers/CommandManager.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/managers/ConnectionManager.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/managers/DragonCreationManager.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/managers/FileManager.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/utils/InputChecker.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/utils/InputTools.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/utils/RequestConstructor.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/utils/RequestResponseTool.java
-/home/zhabka/Documents/labs/programming/lab8/app/src/main/java/utils/TypeComparator.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/Main.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/commands/BasicCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/commands/local/ExecuteScriptCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/commands/local/ExitCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/commands/local/HelpCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/commands/server/ClearCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/commands/server/CountLessThanCharacterCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/commands/server/InfoCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/commands/server/InsertCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/commands/server/LoginCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/commands/server/PrintAscendingCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/commands/server/PrintFieldDescendingTypeCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/commands/server/RegisterCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/commands/server/RemoveGreaterCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/commands/server/RemoveGreaterKeyCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/commands/server/RemoveKeyCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/commands/server/ReplaceIfLowerCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/commands/server/ShowCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/commands/server/UpdateCommand.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/exceptions/ConnectionInterruptedException.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/exceptions/CustomException.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/exceptions/InfiniteFileRecursion.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/exceptions/NoSuchColorException.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/exceptions/NoSuchElementException.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/exceptions/NullArgsForbiddenException.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/exceptions/NullForbiddenException.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/exceptions/RangeExceededException.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/exceptions/WrongRequestException.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/gui/AppStarter.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/gui/DragonTableView.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/gui/managers/ActionsManager.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/gui/managers/AuthManager.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/gui/managers/CommandsManager.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/gui/screens/DragonFormScreen.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/gui/screens/InfoScreen.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/gui/screens/LoginScreen.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/managers/ClientManager.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/managers/CollectionManager.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/managers/CommandManager.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/managers/ConnectionManager.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/managers/DragonCreationManager.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/managers/FileManager.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/utils/InputChecker.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/utils/InputTools.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/utils/RequestConstructor.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/utils/RequestResponseTool.java
+/home/zhabka/git/ITMO/ITMO/labs/programming/lab8/app/src/main/java/utils/TypeComparator.java
 // ./app/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
 managers/DragonCreationManager.class
-commands/BasicCommand.class
 commands/server/PrintAscendingCommand.class
-gui/AppStarter.class
 commands/server/ShowCommand.class
-commands/server/LoginCommand.class
 gui/screens/LoginScreen.class
-commands/server/RegisterCommand.class
-gui/utils/DragonDisplayWrapper.class
-Main.class
 exceptions/NullForbiddenException.class
 exceptions/ConnectionInterruptedException.class
-commands/server/ReplaceIfLowerCommand.class
 commands/server/InsertCommand.class
-exceptions/InfiniteFileRecursion.class
 commands/local/ExecuteScriptCommand.class
-managers/FileManager.class
 exceptions/NoSuchElementException.class
 utils/RequestResponseTool.class
 commands/server/ClearCommand.class
-commands/server/RemoveGreaterCommand.class
 commands/server/CountLessThanCharacterCommand.class
-gui/managers/AuthManager.class
 commands/server/UpdateCommand.class
-commands/server/RemoveKeyCommand.class
-utils/InputTools.class
-exceptions/CustomException.class
-commands/server/RemoveGreaterKeyCommand.class
 gui/screens/InfoScreen.class
 utils/RequestConstructor.class
 managers/FileManager$1.class
 commands/local/HelpCommand.class
 exceptions/WrongRequestException.class
-managers/CommandManager.class
 gui/managers/ActionsManager.class
 managers/ClientManager.class
-managers/ConnectionManager.class
 commands/server/PrintFieldDescendingTypeCommand.class
 gui/DragonTableView.class
 commands/local/ExitCommand.class
-exceptions/NoSuchColorException.class
 utils/TypeComparator.class
 commands/server/InfoCommand.class
-utils/InputChecker.class
 exceptions/RangeExceededException.class
-exceptions/NullArgsForbiddenException.class
 managers/CollectionManager.class
+gui/screens/DragonFormScreen.class
+gui/managers/CommandsManager.class
+commands/BasicCommand.class
+gui/AppStarter.class
+commands/server/LoginCommand.class
+commands/server/RegisterCommand.class
+Main.class
+commands/server/ReplaceIfLowerCommand.class
+exceptions/InfiniteFileRecursion.class
+managers/FileManager.class
+commands/server/RemoveGreaterCommand.class
+gui/managers/AuthManager.class
+commands/server/RemoveKeyCommand.class
+utils/InputTools.class
+exceptions/CustomException.class
+commands/server/RemoveGreaterKeyCommand.class
+gui/DragonTableView$1.class
+managers/CommandManager.class
+managers/ConnectionManager.class
+exceptions/NoSuchColorException.class
+utils/InputChecker.class
+exceptions/NullArgsForbiddenException.class
 // ./app/target/maven-archiver/pom.properties
 artifactId=app
 groupId=org.ITMO.s435169

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Map;
 
 import gui.managers.CommandsManager;
+import gui.managers.LocaleManager;
 import gui.screens.DragonFormScreen;
 import gui.screens.LoginScreen;
 import javafx.application.Application;
@@ -46,19 +47,17 @@ import structs.classes.DragonType;
 import structs.wrappers.DragonDisplayWrapper;
 
 
-/**
- * ПРИМЕЧАНИЕ: Поскольку классы-сущности (Dragon, Coordinates, и т.д.) не были предоставлены,
- * я создал их базовые версии в конце этого файла для полноты и компилируемости.
- * В вашем реальном проекте вы должны использовать свои собственные классы.
- * <p>
- * Этот класс отображает коллекцию драконов в виде таблицы с возможностью
- * фильтрации, сортировки и выполнения команд.
- */
 public class DragonTableView extends Application {
 
+    private final LocaleManager localeManager = LocaleManager.getInstance();
     private static CollectionManager collectionManager;
     private final ObservableList<DragonDisplayWrapper> masterData = FXCollections.observableArrayList();
     User user = null;
+
+
+    Label userLabel;
+    private final static int POLL_RATIO = 1000;
+
     private TableView<DragonDisplayWrapper> table = new TableView<>();
     private TextField filterField;
     private CommandsManager commandsManager = new CommandsManager();
@@ -70,7 +69,8 @@ public class DragonTableView extends Application {
     @Override
     public void start(Stage primaryStage) {
         startLogin();
-        primaryStage.setTitle("Dragon Collection Viewer");
+        primaryStage.titleProperty().bind(localeManager.createStringBinding("app.title"));
+
 
         if (collectionManager == null) {
             collectionManager = new CollectionManager();
@@ -120,6 +120,19 @@ public class DragonTableView extends Application {
 
         Scene scene = new Scene(root, 1200, 800);
         primaryStage.setScene(scene);
+
+        new Thread(() -> {
+            while(true){
+                collectionManager.sync();
+                loadDataFromCollectionManager();
+                try {
+                    Thread.sleep(POLL_RATIO);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
+
         primaryStage.show();
     }
 
