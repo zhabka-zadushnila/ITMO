@@ -5,6 +5,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import gui.managers.CommandsManager;
+import gui.managers.LocaleManager;
 import gui.screens.DragonFormScreen;
 import gui.screens.LoginScreen;
 import javafx.application.Application;
@@ -44,8 +45,7 @@ import structs.wrappers.DragonDisplayWrapper;
 
 
 public class DragonTableView extends Application {
-
-    ///private final LocaleManager localeManager = LocaleManager.getInstance();
+    private final LocaleManager localeManager = LocaleManager.getInstance();
     private static CollectionManager collectionManager;
     private final ObservableList<DragonDisplayWrapper> masterData = FXCollections.observableArrayList();
     User user = null;
@@ -197,17 +197,15 @@ public class DragonTableView extends Application {
         userPanel.setPadding(new Insets(10));
         userPanel.setAlignment(Pos.CENTER_LEFT);
         Label userLabel = new Label();
-        userLabel.textProperty().bind(Bindings.createStringBinding(() ->
-                        (user == null) ? localeManager.getString("user.unregistered") : user.getLogin(),
-                localeManager.localeProperty()
-        ));
 
-        if (user == null) {
-            Button registerButton = new Button("Register/Login");
-            userPanel.getChildren().addAll(userLabel, registerButton);
-        } else {
-            userPanel.getChildren().add(userLabel);
-        }
+
+        Button registerButton = new Button("Register/Login");
+        userPanel.getChildren().addAll(userLabel, registerButton);
+        registerButton.setOnAction(e -> {
+            startLogin();
+            userLabel.setText((user == null) ? "" : user.getLogin());
+        });
+
         topPanel.setLeft(userPanel);
         topPanel.setRight(filterPanel);
         return topPanel;
