@@ -48,7 +48,7 @@ import structs.wrappers.DragonDisplayWrapper;
 
 public class DragonTableView extends Application {
 
-    private final LocaleManager localeManager = LocaleManager.getInstance();
+    //private final LocaleManager localeManager = LocaleManager.getInstance();
     private static CollectionManager collectionManager;
     private final ObservableList<DragonDisplayWrapper> masterData = FXCollections.observableArrayList();
     User user = null;
@@ -65,8 +65,8 @@ public class DragonTableView extends Application {
     @Override
     public void start(Stage primaryStage) {
         startLogin();
-        primaryStage.titleProperty().bind(localeManager.createStringBinding("app.title"));
-
+        //primaryStage.titleProperty().bind(localeManager.createStringBinding("app.title"));
+        primaryStage.setTitle("Dragon Collection Viewer");
 
 
 
