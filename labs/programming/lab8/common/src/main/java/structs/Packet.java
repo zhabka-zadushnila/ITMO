@@ -48,6 +48,10 @@ public class Packet implements Serializable {
         return user;
     }
 
+    public Map<String, Dragon> getMap(){
+        return map;
+    }
+
     public AbstractMap.SimpleEntry<String, Object> getArgsObjectEntry() {
         try {
             return new AbstractMap.SimpleEntry<>(arguments[0], object);
