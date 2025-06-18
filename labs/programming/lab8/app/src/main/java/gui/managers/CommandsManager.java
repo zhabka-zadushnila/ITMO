@@ -17,7 +17,7 @@ public class CommandsManager {
 
     static int MAX_RECONNECT_ATTEMPTS = 5;
     static int RECONNECT_TIMEOUT = 2000; //millis
-    String hostname = "localhost";
+    String hostname = "188.242.233.237";
     int port = 52947;
     SocketChannel channel = ConnectionManager.connectToServer(hostname, port, MAX_RECONNECT_ATTEMPTS, RECONNECT_TIMEOUT);
 

@@ -29,6 +29,18 @@ public class AuthManager {
     }
 
     public boolean login(String login, String password) {
+        if(login == null){
+            return false;
+        }
+        if (login.trim().isBlank()) {
+            return false;
+        }
+        if(password == null){
+            return false;
+        }
+        if (password.trim().isBlank()) {
+            return false;
+        }
         Packet packet = RequestConstructor.createRequest(new LoginCommand(null), null, new User(login, password), null);
         try {
             RequestResponseTool.sendPacket(channel, packet);
@@ -47,6 +59,18 @@ public class AuthManager {
     }
 
     public boolean register(String login, String password) {
+        if(login == null){
+            return false;
+        }
+        if (login.trim().isBlank()) {
+            return false;
+        }
+        if(password == null){
+            return false;
+        }
+        if (password.trim().isBlank()) {
+            return false;
+        }
         SocketChannel channel = ConnectionManager.connectToServer(hostname, port, MAX_RECONNECT_ATTEMPTS, RECONNECT_TIMEOUT);
         Packet packet = RequestConstructor.createRequest(new RegisterCommand(null), null, new User(login, password), null);
         try {
