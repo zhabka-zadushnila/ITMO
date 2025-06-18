@@ -5,5 +5,6 @@ public enum PacketType {
     OBJECT_COMMAND,
     TEXT,
     AUTH,
-    MISC
+    MISC,
+    MAP
 }

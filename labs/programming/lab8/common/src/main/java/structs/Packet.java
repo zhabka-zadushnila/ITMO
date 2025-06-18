@@ -2,6 +2,9 @@ package structs;
 
 import java.io.Serializable;
 import java.util.AbstractMap;
+import java.util.Map;
+
+import structs.classes.Dragon;
 
 public class Packet implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -11,6 +14,7 @@ public class Packet implements Serializable {
     String[] arguments;
     Object object;
     String text;
+    Map<String, Dragon> map;
 
     public Packet(PacketType packetType, String command, String[] arguments, User user) {
         this(packetType, command, arguments, null, user);
@@ -31,6 +35,11 @@ public class Packet implements Serializable {
         this.object = object;
         this.text = text;
         this.user = user;
+    }
+
+    public Packet(PacketType packetType, Map<String, Dragon> map){
+        this.map = map;
+        this.packetType = packetType;
     }
 
     public User getUser() {
