@@ -113,7 +113,9 @@ public class DragonTableView extends Application {
 
         root.setRight(rightBox);
 
-
+        table.requestFocus();
+        table.getSelectionModel().select(0);
+        table.getFocusModel().focus(0);
         loadDataFromCollectionManager();
 
         Scene scene = new Scene(root, 1200, 800);
@@ -122,14 +124,25 @@ public class DragonTableView extends Application {
         new Thread(() -> {
             while (true) {
                 try {
-                    collectionManager.sync();
+                    //DragonDisplayWrapper dragonDisplayWrapper = table.getSelectionModel().getSelectedItem();
+                    if(table.getSelectionModel().getSelectedItem()!=null){
+                        Thread.sleep(200);
+                    }else{
+                        collectionManager.sync();
 
-                    Platform.runLater(() -> {
-                        loadDataFromCollectionManager();
-                        updateVisualPane(primaryStage);
-                    });
+                        Platform.runLater(() -> {
+                            loadDataFromCollectionManager();
+                            updateVisualPane(primaryStage);
+                        });
+                        /*if(dragonDisplayWrapper != null){
+                            System.out.println(table.getSelectionModel().getSelectedIndex());
+                            System.out.println(table.getSelectionModel().getFocusedIndex());
 
-                    Thread.sleep(2000);
+                            table.getSelectionModel().select(dragonDisplayWrapper);
+
+                        }*/
+                        Thread.sleep(1000);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -197,9 +210,13 @@ public class DragonTableView extends Application {
         userPanel.setPadding(new Insets(10));
         userPanel.setAlignment(Pos.CENTER_LEFT);
         Label userLabel = new Label();
+        userLabel.setText((user == null) ? "" : user.getLogin());
 
 
-        Button registerButton = new Button("Register/Login");
+        Button registerButton = new Button();
+        registerButton.textProperty().bind(localeManager.createStringBinding("button.registerLogin"));
+
+
         userPanel.getChildren().addAll(userLabel, registerButton);
         registerButton.setOnAction(e -> {
             startLogin();
@@ -366,13 +383,16 @@ private void attachInfoHandler(Node node, Dragon dragon, Stage primaryStage, Str
     });
 }
     private void setupTable() {
-        TableColumn<DragonDisplayWrapper, String> keyCol = new TableColumn<>("Key");
+        TableColumn<DragonDisplayWrapper, String> keyCol = new TableColumn<>();
+        keyCol.textProperty().bind(localeManager.createStringBinding("column.key"));
         keyCol.setCellValueFactory(new PropertyValueFactory<>("key"));
 
-        TableColumn<DragonDisplayWrapper, String> ownerCol = new TableColumn<>("Owner");
+        TableColumn<DragonDisplayWrapper, String> ownerCol = new TableColumn<>();
+        ownerCol.textProperty().bind(localeManager.createStringBinding("column.owner"));
         ownerCol.setCellValueFactory(new PropertyValueFactory<>("owner"));
 
-        TableColumn<DragonDisplayWrapper, String> nameCol = new TableColumn<>("Name");
+        TableColumn<DragonDisplayWrapper, String> nameCol = new TableColumn<>();
+        nameCol.textProperty().bind(localeManager.createStringBinding("column.name"));
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
 
         TableColumn<DragonDisplayWrapper, Double> xCol = new TableColumn<>("X");
@@ -381,13 +401,16 @@ private void attachInfoHandler(Node node, Dragon dragon, Stage primaryStage, Str
         TableColumn<DragonDisplayWrapper, Long> yCol = new TableColumn<>("Y");
         yCol.setCellValueFactory(new PropertyValueFactory<>("y"));
 
-        TableColumn<DragonDisplayWrapper, LocalDate> dateCol = new TableColumn<>("Creation Date");
+        TableColumn<DragonDisplayWrapper, LocalDate> dateCol = new TableColumn<>();
+        dateCol.textProperty().bind(localeManager.createStringBinding("column.creationDate"));
         dateCol.setCellValueFactory(new PropertyValueFactory<>("creationDate"));
 
-        TableColumn<DragonDisplayWrapper, Integer> ageCol = new TableColumn<>("Age");
+        TableColumn<DragonDisplayWrapper, Integer> ageCol = new TableColumn<>();
+        ageCol.textProperty().bind(localeManager.createStringBinding("column.age"));
         ageCol.setCellValueFactory(new PropertyValueFactory<>("age"));
 
-        TableColumn<DragonDisplayWrapper, String> colorCol = new TableColumn<>("Color");
+        TableColumn<DragonDisplayWrapper, String> colorCol = new TableColumn<>();
+        colorCol.textProperty().bind(localeManager.createStringBinding("column.color"));
         colorCol.setCellValueFactory(new PropertyValueFactory<>("color"));
 
         TableColumn<DragonDisplayWrapper, String> typeCol = new TableColumn<>("Type");
