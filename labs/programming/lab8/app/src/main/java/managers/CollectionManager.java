@@ -1,9 +1,16 @@
 package managers;
 
+import structs.Packet;
 import structs.classes.Dragon;
+import utils.RequestConstructor;
+import utils.RequestResponseTool;
 
+import java.io.IOException;
+import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Map;
+
+import javafx.collections.FXCollections;
 
 /**
  * Manager that manages collection
@@ -11,7 +18,14 @@ import java.util.Map;
 public class CollectionManager {
 
     private final java.time.LocalDate initTime;
-    Map<String, Dragon> collection = new HashMap<String, Dragon>();
+    Map<String, Dragon> collection = FXCollections.observableHashMap();
+    static int MAX_RECONNECT_ATTEMPTS = 5;
+    static int RECONNECT_TIMEOUT = 2000; //millis
+    String hostname;
+    int port;
+    SocketChannel channel = ConnectionManager.connectToServer(hostname, port, MAX_RECONNECT_ATTEMPTS, RECONNECT_TIMEOUT);
+
+
 
     /**
      * May be initiated with no specific params
@@ -115,5 +129,16 @@ public class CollectionManager {
         this.collection = collection;
     }
 
+    public void sync(){
+        Packet packet = RequestConstructor.createRequest();
+        try {
+            RequestResponseTool.sendPacket(channel, packet);
+        } catch (IOException ex) {
+        }
+        packet = RequestResponseTool.getPacket(channel);
+        Map<String, Dragon> updatedCollection = packet.getMap();
+        this.collection = updatedCollection;
+
+    }
 
 }

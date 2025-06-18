@@ -1,15 +1,17 @@
 package handlers;
 
-import Interpreters.ServerCommandInterpreter;
-import structs.Packet;
-import utils.RequestConstructor;
-import utils.RequestResponseTool;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Logger;
+
+import Interpreters.ServerCommandInterpreter;
+import structs.Packet;
+import structs.classes.Dragon;
+import utils.RequestConstructor;
+import utils.RequestResponseTool;
 
 public class ClientHandler implements Runnable {
     private static final Logger logger = Logger.getLogger(ClientHandler.class.getName());
@@ -83,10 +85,15 @@ public class ClientHandler implements Runnable {
 
     private void processRequest(Packet packet, SocketChannel socketChannel) {
         try {
-            String response = serverCommandInterpreter.executeRequest(packet);
-            String result = (response != null) ? response : "Request executed successfully";
+            if(packet.isMap()){
+                writePool.execute(() -> sendResponse(socketChannel, serverCommandInterpreter.getCollectionManager().getCollection()));
+            }else{
+                String response = serverCommandInterpreter.executeRequest(packet);
+                String result = (response != null) ? response : "Request executed successfully";
+                writePool.execute(() -> sendResponse(socketChannel, result));
+            }
 
-            writePool.execute(() -> sendResponse(socketChannel, result));
+            
         } catch (Exception e) {
             logger.severe("Error executing command: " + e.getMessage());
             writePool.execute(() -> sendResponse(socketChannel, "Internal server error"));
@@ -95,6 +102,10 @@ public class ClientHandler implements Runnable {
 
     private void sendResponse(SocketChannel socketChannel, String message) {
         Packet responsePacket = RequestConstructor.createRequest(message);
+        RequestResponseTool.sendRequest(socketChannel, responsePacket);
+    }
+    private void sendResponse(SocketChannel socketChannel, Map<String, Dragon> collection) {
+        Packet responsePacket = RequestConstructor.createRequest(collection);
         RequestResponseTool.sendRequest(socketChannel, responsePacket);
     }
 }

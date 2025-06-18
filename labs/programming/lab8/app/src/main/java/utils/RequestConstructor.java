@@ -1,5 +1,7 @@
 package utils;
 
+import java.util.TreeMap;
+
 import commands.BasicCommand;
 import structs.Packet;
 import structs.PacketType;
@@ -19,5 +21,9 @@ public class RequestConstructor {
         }
 
         return null;
+    }
+///метод для запроса актуальной версии коллекции
+    public static Packet createRequest(){
+        return new Packet(PacketType.MAP, new TreeMap<>());
     }
 }
