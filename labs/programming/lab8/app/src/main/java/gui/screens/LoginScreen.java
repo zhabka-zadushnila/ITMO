@@ -1,6 +1,6 @@
-package gui;
+package gui.screens;
 
-import javafx.application.Application;
+import gui.managers.AuthManager;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -15,11 +15,13 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import structs.User;
 
-public class LoginScreen extends Application {
+public class LoginScreen {
+    User returnableUser = null;
 
-    @Override
-    public void start(Stage primaryStage) {
+    public User start() {
+        Stage primaryStage = new Stage();
         primaryStage.setTitle("Dragon Collection Manager - Login");
 
 
@@ -64,36 +66,36 @@ public class LoginScreen extends Application {
         loginBtn.setOnAction(e -> {
             String username = userTextField.getText();
             String password = pwBox.getText();
-
-            // ** THIS IS WHERE YOU CONNECT YOUR LOGIC **
-            // For now, we'll just print to the console and update the text.
             System.out.println("Attempting login for user: " + username);
 
-            // TODO: Implement actual authentication logic.
-            // You would typically have a network client or auth manager here.
-            // boolean success = authManager.login(username, password);
-            // if (success) {
-            //     actiontarget.setFill(Color.GREEN);
-            //     actiontarget.setText("Login successful!");
-            //     // TODO: Close login window and open the main application window.
-            // } else {
-            //     actiontarget.setFill(Color.FIREBRICK);
-            //     actiontarget.setText("Login failed. Please try again.");
-            // }
-            actiontarget.setFill(Color.FIREBRICK);
-            actiontarget.setText("Login functionality not yet implemented.");
+            boolean success = (new AuthManager()).login(username, password);
+            if (success) {
+                actiontarget.setFill(Color.GREEN);
+                actiontarget.setText("Login successful!");
+                this.returnableUser = new User(username, password);
+                primaryStage.close();
+            } else {
+                actiontarget.setFill(Color.FIREBRICK);
+                actiontarget.setText("Login failed. Please try again.");
+            }
         });
 
         registerBtn.setOnAction(e -> {
             String username = userTextField.getText();
             String password = pwBox.getText();
 
-            // ** THIS IS WHERE YOU CONNECT YOUR LOGIC **
-            System.out.println("Attempting to register user: " + username);
 
-            // TODO: Implement actual registration logic.
-            actiontarget.setFill(Color.FIREBRICK);
-            actiontarget.setText("Registration functionality not yet implemented.");
+            System.out.println("Attempting to register user: " + username);
+            boolean success = (new AuthManager()).register(username, password);
+            if (success) {
+                actiontarget.setFill(Color.GREEN);
+                actiontarget.setText("Registration successful!");
+                this.returnableUser = new User(username, password);
+                primaryStage.close();
+            } else {
+                actiontarget.setFill(Color.FIREBRICK);
+                actiontarget.setText("Registration failed. Please try again.");
+            }
         });
 
 
@@ -101,8 +103,9 @@ public class LoginScreen extends Application {
         Scene scene = new Scene(grid, 400, 300);
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
+        primaryStage.showAndWait();
 
         // Show the window
-        primaryStage.show();
+        return returnableUser;
     }
 }

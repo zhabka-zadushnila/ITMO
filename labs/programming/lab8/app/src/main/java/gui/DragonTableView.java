@@ -3,6 +3,9 @@ package gui;
 import java.time.LocalDate;
 import java.util.Map;
 
+import gui.managers.CommandsManager;
+import gui.screens.DragonFormScreen;
+import gui.screens.LoginScreen;
 import gui.utils.DragonDisplayWrapper;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -33,12 +36,19 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import managers.CollectionManager;
+
 import structs.classes.Color;
 import structs.classes.Coordinates;
 import structs.classes.Dragon;
 import structs.classes.DragonCave;
 import structs.classes.DragonCharacter;
 import structs.classes.DragonType;
+import structs.User;
+import structs.classes.*;
+
+import java.time.LocalDate;
+import java.util.Map;
+
 
 /**
  * ПРИМЕЧАНИЕ: Поскольку классы-сущности (Dragon, Coordinates, и т.д.) не были предоставлены,
@@ -52,8 +62,10 @@ public class DragonTableView extends Application {
 
     private static CollectionManager collectionManager;
     private final ObservableList<DragonDisplayWrapper> masterData = FXCollections.observableArrayList();
+    User user = null;
     private TableView<DragonDisplayWrapper> table = new TableView<>();
     private TextField filterField;
+    private CommandsManager commandsManager = new CommandsManager();
 
     public static void initialize(CollectionManager cm) {
         collectionManager = cm;
@@ -61,6 +73,7 @@ public class DragonTableView extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        startLogin();
         primaryStage.setTitle("Dragon Collection Viewer");
 
         if (collectionManager == null) {
@@ -76,7 +89,7 @@ public class DragonTableView extends Application {
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(10));
 
-        HBox topPanel = createTopPanel();
+        BorderPane topPanel = createTopPanel();
         root.setTop(topPanel);
 
         setupTable();
@@ -115,19 +128,38 @@ public class DragonTableView extends Application {
         primaryStage.show();
     }
 
-    private HBox createTopPanel() {
-        HBox topPanel = new HBox(10);
-        topPanel.setPadding(new Insets(10));
-        topPanel.setAlignment(Pos.CENTER_LEFT);
+    private void startLogin() {
+        this.user = (new LoginScreen()).start();
+    }
 
+
+    private BorderPane createTopPanel() {
+        BorderPane topPanel = new BorderPane();
+
+        HBox filterPanel = new HBox(10);
+        filterPanel.setPadding(new Insets(10));
+        filterPanel.setAlignment(Pos.CENTER_RIGHT);
         Label filterLabel = new Label("Filter:");
         filterField = new TextField();
         filterField.setPromptText("Type to filter...");
 
         Button refreshButton = new Button("Refresh");
         refreshButton.setOnAction(e -> loadDataFromCollectionManager());
+        filterPanel.getChildren().addAll(filterLabel, filterField, refreshButton);
 
-        topPanel.getChildren().addAll(filterLabel, filterField, refreshButton);
+
+        HBox userPanel = new HBox(10);
+        userPanel.setPadding(new Insets(10));
+        userPanel.setAlignment(Pos.CENTER_LEFT);
+        Label userLabel = new Label((user == null) ? "Unregistered" : user.getLogin());
+        if (user == null) {
+            Button registerButton = new Button("Register/Login");
+            userPanel.getChildren().addAll(userLabel, registerButton);
+        } else {
+            userPanel.getChildren().add(userLabel);
+        }
+        topPanel.setLeft(userPanel);
+        topPanel.setRight(filterPanel);
         return topPanel;
     }
 
@@ -298,86 +330,96 @@ public class DragonTableView extends Application {
         bottomPanel.setVgap(10);
         bottomPanel.setAlignment(Pos.CENTER_LEFT);
 
-        String[] commandNames = {"info", "show", "insert", "update", "remove_key", "clear", "remove_greater", "replace_if_lower"};
+        String[] commandNames = {"info", "show", "insert", "update", "remove_key", "remove_greater", "replace_if_lower"};
 
         for (String commandName : commandNames) {
             Button btn = new Button(commandName.replace('_', ' '));
-            //btn.setOnAction(e -> handleCommand(commandName));
+            btn.setOnAction(e -> handleCommand(commandName));
             bottomPanel.getChildren().add(btn);
         }
         return bottomPanel;
     }
 
-    /*
+
     private void handleCommand(String commandName) {
 
         System.out.println("Executing command: " + commandName);
 
         switch (commandName) {
-            case "insert":
-                DragonFormDialog insertDialog = new DragonFormDialog();
-                Optional<Dragon> insertResult = insertDialog.showAndWait();
-                insertResult.ifPresent(dragon -> {
 
-                    TextInputDialog keyDialog = new TextInputDialog("new_key");
-                    keyDialog.setTitle("Insert Dragon");
-                    keyDialog.setHeaderText("Enter the key for the new dragon.");
-                    keyDialog.setContentText("Key:");
-                    Optional<String> keyResult = keyDialog.showAndWait();
-                    keyResult.ifPresent(key -> {
-                        System.out.println("Executing insert with key: " + key + " and dragon: " + dragon.getName());
-                        // collectionManager.addElement(key, dragon);
-                        // loadDataFromCollectionManager();
-                    });
-                });
+            case "insert":
+                DragonFormScreen insertDialog = new DragonFormScreen();
+                Map.Entry<String, Dragon> newEntry = insertDialog.getNewDragon();
+                if (newEntry != null) {
+                    newEntry.getValue().setOwnerLogin(user.getLogin());
+                    String response = commandsManager.insertDragon(newEntry, user);
+                    showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                    collectionManager.sync();
+                    loadDataFromCollectionManager();
+                }
                 break;
 
             case "update":
-            case "replace_if_lower":
                 DragonDisplayWrapper selectedForUpdate = table.getSelectionModel().getSelectedItem();
-                if (selectedForUpdate == null) {
-                    showAlert(Alert.AlertType.WARNING, "No Selection", "Please select a dragon in the table to " + commandName + ".");
-                    return;
+                if (selectedForUpdate.getOwner().equals(user.getLogin())) {
+                    DragonFormScreen updateDialog = new DragonFormScreen();
+                    Dragon newDragon = updateDialog.updateDragon(selectedForUpdate);
+                    if (newDragon != null) {
+                        collectionManager.replaceElement(selectedForUpdate.getKey(), newDragon);
+                        String response = commandsManager.updateDragon(Map.entry(selectedForUpdate.getKey(), newDragon), user);
+                        showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                        collectionManager.sync();
+                        loadDataFromCollectionManager();
+                    }
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
                 }
-                DragonFormDialog updateDialog = new DragonFormDialog(selectedForUpdate.getOriginalDragon());
-                Optional<Dragon> updateResult = updateDialog.showAndWait();
-                updateResult.ifPresent(dragon -> {
-                    System.out.println("Executing " + commandName + " on key: " + selectedForUpdate.getKey());
-                    // collectionManager.replaceElement(selectedForUpdate.getKey(), dragon);
-                    // loadDataFromCollectionManager();
-                });
+                break;
+
+            case "replace_if_lower":
+                DragonDisplayWrapper selectedForReplace = table.getSelectionModel().getSelectedItem();
+                if (selectedForReplace.getOwner().equals(user.getLogin())) {
+                    DragonFormScreen updateDialog = new DragonFormScreen();
+                    Dragon newDragon = updateDialog.updateDragon(selectedForReplace);
+                    if (newDragon != null) {
+                        collectionManager.replaceElement(selectedForReplace.getKey(), newDragon);
+                        String response = commandsManager.replaceIfLowerDragon(Map.entry(selectedForReplace.getKey(), newDragon), user);
+                        showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                        collectionManager.sync();
+                        loadDataFromCollectionManager();
+                    }
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
+                }
                 break;
 
             case "remove_key":
-            case "remove_greater":
-                DragonDisplayWrapper selectedForKey = table.getSelectionModel().getSelectedItem();
-                String initialKey = (selectedForKey != null) ? selectedForKey.getKey() : "";
-                TextInputDialog removeDialog = new TextInputDialog(initialKey);
-                removeDialog.setTitle("Input Required");
-                removeDialog.setHeaderText("Enter the key for command: " + commandName);
-                removeDialog.setContentText("Key:");
-                Optional<String> removeResult = removeDialog.showAndWait();
-                removeResult.ifPresent(key -> {
-                    System.out.println("Executing " + commandName + " with key: " + key);
-                    // collectionManager.killElement(key);
-                    // loadDataFromCollectionManager();
-                });
-                break;
+                DragonDisplayWrapper selectedForRemove = table.getSelectionModel().getSelectedItem();
+                if (selectedForRemove.getOwner().equals(user.getLogin())) {
+                    String response = commandsManager.removeKeyDragon(new String[]{selectedForRemove.getKey()}, user);
+                    showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                    collectionManager.sync();
+                    loadDataFromCollectionManager();
 
-            case "clear":
-                Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
-                confirmDialog.setTitle("Confirm Clear");
-                confirmDialog.setHeaderText("Are you sure you want to clear the entire collection?");
-                confirmDialog.setContentText("This action cannot be undone.");
-                Optional<ButtonType> confirmResult = confirmDialog.showAndWait();
-                if (confirmResult.isPresent() && confirmResult.get() == ButtonType.OK) {
-                    System.out.println("Executing clear...");
-                    // collectionManager.clearCollection();
-                    // loadDataFromCollectionManager();
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
+                }
+                break;
+            case "remove_greater":
+                DragonDisplayWrapper selectedForRemoveGr = table.getSelectionModel().getSelectedItem();
+                if (selectedForRemoveGr.getOwner().equals(user.getLogin())) {
+                    String response = commandsManager.removeKeyGrDragon(new String[]{selectedForRemoveGr.getKey()}, user);
+                    showAlert(Alert.AlertType.INFORMATION, "Execution result", response);
+                    collectionManager.sync();
+                    loadDataFromCollectionManager();
+
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Bruh", "Sorry, but you can not modify someones dragon");
                 }
                 break;
 
             case "info":
+                collectionManager.sync();
                 Map<String, Object> info = collectionManager.getCollectionInfoMap();
                 showAlert(Alert.AlertType.INFORMATION, "Collection Info",
                         "Type: " + info.get("Type") + "\n" +
@@ -392,7 +434,7 @@ public class DragonTableView extends Application {
                 break;
         }
     }
-    */
+
     private void loadDataFromCollectionManager() {
         masterData.clear();
         Map<String, Dragon> collection = collectionManager.getCollection();

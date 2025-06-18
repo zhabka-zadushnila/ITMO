@@ -67,7 +67,7 @@ public class DragonDisplayWrapper {
         return originalDragon;
     }
 
-    // Метод для Stream API, возвращающий все поля в виде строк
+
     public Stream<String> getStreamOfFields() {
         return Stream.of(
                 getKey(),
