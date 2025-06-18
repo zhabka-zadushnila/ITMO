@@ -1,10 +1,10 @@
 package commands;
 
+import java.util.stream.Collectors;
+
 import managers.CollectionManager;
 import structs.User;
 import utils.TypeComparator;
-
-import java.util.stream.Collectors;
 
 /**
  * Outputs id : type
@@ -24,7 +24,7 @@ public class PrintFieldDescendingTypeCommand extends BasicCommand {
     public String execute(Object args, User user) {
         return this.collectionManager.getCollection().values().stream()
                 .sorted(new TypeComparator())
-                .map((dragon) -> dragon.getId() + " : " + dragon.getType().toString() + "\n")
+                .map((dragon) -> dragon.getType().toString() + "\n")
                 .collect(Collectors.joining());
     }
 }

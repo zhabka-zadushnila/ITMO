@@ -1,9 +1,8 @@
 package utils;
 
-import classes.Dragon;
-import classes.DragonType;
-
 import java.util.Comparator;
+
+import structs.classes.Dragon;
 
 /**
  * Simple comparator that is used for default sort method in arrays.

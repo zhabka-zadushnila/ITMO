@@ -1,13 +1,13 @@
 package commands;
 
-import classes.Dragon;
+import java.util.Map;
+
 import exceptions.NoSuchElementException;
 import exceptions.NullArgsForbiddenException;
 import managers.CollectionManager;
 import managers.CommandManager;
 import structs.User;
-
-import java.util.Map;
+import structs.classes.Dragon;
 
 /**
  * Used for updating element with specific id
@@ -34,7 +34,6 @@ public class UpdateCommand extends BasicCommand {
                 return "Got null, nothing changes";
             }
             Dragon dragon = entry.getValue();
-            dragon.setId(collectionManager.getElement(entry.getKey()).getId());
             if (!collectionManager.getDbManager().isDragonUsers(entry.getKey(), user.getLogin())) {
                 return "you cannot change someones dragon";
             }

@@ -1,14 +1,14 @@
 package commands;
 
-import classes.Dragon;
-import exceptions.NullArgsForbiddenException;
-import managers.CollectionManager;
-import structs.User;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import exceptions.NullArgsForbiddenException;
+import managers.CollectionManager;
+import structs.User;
+import structs.classes.Dragon;
 
 /**
  * Removes elements with key greater than this one

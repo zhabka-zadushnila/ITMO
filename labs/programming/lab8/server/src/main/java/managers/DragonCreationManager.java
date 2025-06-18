@@ -1,12 +1,16 @@
 package managers;
-
-import classes.*;
-import exceptions.NullForbiddenException;
-import exceptions.RangeExceededException;
-import utils.InputChecker;
-
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+
+import exceptions.NullForbiddenException;
+import exceptions.RangeExceededException;
+import structs.classes.Color;
+import structs.classes.Coordinates;
+import structs.classes.Dragon;
+import structs.classes.DragonCave;
+import structs.classes.DragonCharacter;
+import structs.classes.DragonType;
+import utils.InputChecker;
 
 /**
  * Basically class that is used only for dragon creation process

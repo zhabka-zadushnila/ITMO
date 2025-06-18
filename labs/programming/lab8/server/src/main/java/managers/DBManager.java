@@ -1,9 +1,6 @@
 package managers;
 
 
-import classes.*;
-import structs.SQLAnswer;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
@@ -11,9 +8,27 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.sql.*;
+import java.sql.Connection;
 import java.sql.Date;
-import java.util.*;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import structs.SQLAnswer;
+import structs.classes.Color;
+import structs.classes.Coordinates;
+import structs.classes.Dragon;
+import structs.classes.DragonCave;
+import structs.classes.DragonCharacter;
+import structs.classes.DragonType;
 
 public class DBManager {
     String sqlInsert = "INSERT INTO users (login, salt, password) VALUES (?, ?, ?)";

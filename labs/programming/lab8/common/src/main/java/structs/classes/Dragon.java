@@ -8,6 +8,7 @@ import java.time.LocalDate;
  */
 public class Dragon implements Comparable<Dragon>, Serializable {
     private static final long serialVersionUID = 1L;
+    public static int idCreator = 0;
     private String ownerLogin;
     private String name; //Поле не может быть null, Строка не может быть пустой
     private Coordinates coordinates; //Поле не может быть null

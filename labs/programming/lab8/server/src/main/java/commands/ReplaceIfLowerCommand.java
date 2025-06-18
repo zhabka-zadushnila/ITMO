@@ -1,13 +1,13 @@
 package commands;
 
-import classes.Dragon;
+import java.util.Map;
+
 import exceptions.NoSuchElementException;
 import exceptions.NullArgsForbiddenException;
 import managers.CollectionManager;
 import managers.CommandManager;
 import structs.User;
-
-import java.util.Map;
+import structs.classes.Dragon;
 
 
 /**
@@ -40,8 +40,6 @@ public class ReplaceIfLowerCommand extends BasicCommand {
         if (collectionManager.hasElement(entry.getKey())) {
 
             if (collectionManager.getElement(entry.getKey()).compareTo(dragon) < 0) {
-                dragon.setId(Dragon.getIdCreator());
-                Dragon.setIdCreator(Dragon.getIdCreator() + 1);
                 if (collectionManager.getDbManager().updateDragon(dragon, entry.getKey(), user.getLogin()).isExpectedBehabiour()) {
                     collectionManager.replaceElement(entry.getKey(), dragon);
                 }

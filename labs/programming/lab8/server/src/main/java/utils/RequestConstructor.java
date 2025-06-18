@@ -1,11 +1,11 @@
 package utils;
+import java.util.logging.Logger;
 
 import commands.BasicCommand;
+import managers.CollectionManager;
 import structs.Packet;
 import structs.PacketType;
 import structs.User;
-
-import java.util.logging.Logger;
 
 public class RequestConstructor {
     private static final Logger logger = Logger.getLogger(RequestConstructor.class.getName());
@@ -21,5 +21,9 @@ public class RequestConstructor {
     public static Packet createRequest(String string) {
         logger.fine("Created text request with: " + string);
         return new Packet(PacketType.TEXT, null, null, null, string, null);
+    }
+
+    public static Packet createRequest(CollectionManager collection){
+        return new Packet(PacketType.MAP, collection.getCollection());
     }
 }
