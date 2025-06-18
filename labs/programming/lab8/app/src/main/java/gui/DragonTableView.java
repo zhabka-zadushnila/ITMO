@@ -65,7 +65,8 @@ public class DragonTableView extends Application {
     @Override
     public void start(Stage primaryStage) {
         startLogin();
-        primaryStage.setTitle("Dragon Collection Viewer");
+        primaryStage.titleProperty().bind(localeManager.createStringBinding("app.title"));
+
 
 
 
