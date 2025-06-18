@@ -360,6 +360,7 @@ public class DragonTableView extends Application {
                 if (selectedForUpdate.getOwner().equals(user.getLogin())) {
                     DragonFormScreen updateDialog = new DragonFormScreen();
                     Dragon newDragon = updateDialog.updateDragon(selectedForUpdate);
+                    newDragon.setOwnerLogin(user.getLogin());
                     if (newDragon != null) {
                         collectionManager.replaceElement(selectedForUpdate.getKey(), newDragon);
                         String response = commandsManager.updateDragon(new DragonDisplayWrapper(selectedForUpdate.getKey(), newDragon), user);
@@ -377,6 +378,7 @@ public class DragonTableView extends Application {
                 if (selectedForReplace.getOwner().equals(user.getLogin())) {
                     DragonFormScreen updateDialog = new DragonFormScreen();
                     Dragon newDragon = updateDialog.updateDragon(selectedForReplace);
+                    newDragon.setOwnerLogin(user.getLogin());
                     if (newDragon != null) {
                         collectionManager.replaceElement(selectedForReplace.getKey(), newDragon);
                         String response = commandsManager.replaceIfLowerDragon(new DragonDisplayWrapper(selectedForReplace.getKey(), newDragon), user);

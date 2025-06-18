@@ -66,7 +66,7 @@ public class ServerCommandInterpreter {
                 }
                 if (packet.isObjectCommand()) {
                     logger.info("Server got " + command.getName() + " command");
-                    return command.execute(packet.getArgsObjectEntry(), packet.getUser());
+                    return command.execute(packet.getArgsObjectWrapper(), packet.getUser());
                 }
             } catch (CustomException | FileNotFoundException e) {
                 return e.toString();

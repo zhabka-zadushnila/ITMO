@@ -1,7 +1,8 @@
 package utils;
 
 import exceptions.WrongRequestException;
-import structs.Packet;
+import structs.*;
+import structs.wrappers.*;
 
 import java.io.*;
 import java.nio.ByteBuffer;
