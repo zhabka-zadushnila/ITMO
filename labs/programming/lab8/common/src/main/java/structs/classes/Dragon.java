@@ -2,6 +2,7 @@ package structs.classes;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Objects;
 
 /**
  * Main object in our story.
@@ -47,6 +48,19 @@ public class Dragon implements Comparable<Dragon>, Serializable {
         this(name, coordinates, age, color, type);
         this.character = character;
         this.cave = cave;
+    }
+
+    
+    public boolean equality(Dragon dragon){
+        return this.name.equals(dragon.getName())&&
+                this.coordinates.getX()==dragon.getCoordinates().getX()&&
+                Objects.equals(this.coordinates.getY(), dragon.getCoordinates().getY())&&
+                this.color==dragon.getColor()&&
+                this.type == dragon.getType()&&
+                this.character == dragon.getCharacter()&&
+                this.cave.getDepth() == dragon.getCave().getDepth();
+
+        
     }
 
 
