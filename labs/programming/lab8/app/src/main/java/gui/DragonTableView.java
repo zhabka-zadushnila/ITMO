@@ -1,18 +1,13 @@
 package gui;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import gui.managers.CommandsManager;
 import gui.managers.LocaleManager;
 import gui.screens.DragonFormScreen;
 import gui.screens.LoginScreen;
-import javafx.animation.FadeTransition;
-import javafx.animation.ScaleTransition;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.application.Platform;
@@ -38,7 +33,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import managers.CollectionManager;
 import structs.User;
 import structs.classes.Color;
@@ -54,7 +48,6 @@ public class DragonTableView extends Application {
     private final LocaleManager localeManager = LocaleManager.getInstance();
     private static CollectionManager collectionManager;
     private final ObservableList<DragonDisplayWrapper> masterData = FXCollections.observableArrayList();
-    private Map<String,Dragon> previousCollection = new HashMap<>();
     User user = null;
 
 
@@ -65,7 +58,6 @@ public class DragonTableView extends Application {
     private TextField filterField;
     private Pane visual;
     private CommandsManager commandsManager = new CommandsManager();
-    private final Map<String, Node> visualNodes = new HashMap<>();
 
     public static void initialize(CollectionManager cm) {
         collectionManager = cm;
@@ -165,44 +157,13 @@ public class DragonTableView extends Application {
     }
 
     private void updateVisualPane(Stage primaryStage) {
-        visual.getChildren().clear();
-    
+        visual.getChildren().clear();  
         for (DragonDisplayWrapper dragonWrapper : masterData) {
-            String key = dragonWrapper.getKey();
-            Dragon currentDragon = dragonWrapper.getOriginalDragon();
-            Dragon previousDragon = previousCollection.get(key);
-    
-            Node visualisation = getVisualisation(currentDragon, primaryStage, key);
-    
+            Dragon dragon = dragonWrapper.getOriginalDragon();
+            Node visualisation = getVisualisation(dragon, primaryStage, dragonWrapper.getKey());
             visual.getChildren().add(visualisation);
-
-            if (!previousCollection.containsKey(key)) {
-               playAppearAnimation(visualisation);
-            }
-            else if (!currentDragon.equals(previousDragon)) {
-                playUpdateAnimation(visualisation);
-            }
         }
     }
-
-    private void playAppearAnimation(Node node) {
-        node.setOpacity(0);
-        FadeTransition fade = new FadeTransition(Duration.millis(800), node);
-        fade.setFromValue(0.0);
-        fade.setToValue(1.0);
-        fade.play();
-    }
-
-private void playUpdateAnimation(Node node) {
-    ScaleTransition scale = new ScaleTransition(Duration.millis(500), node);
-    scale.setFromX(1.2);
-    scale.setFromY(1.2);
-    scale.setToX(1.0);
-    scale.setToY(1.0);
-    scale.setAutoReverse(false);
-    scale.play();
-}
-
 
     private void updateDragon(Dragon dragon, String key){
 
@@ -618,11 +579,6 @@ private void attachInfoHandler(Node node, Dragon dragon, Stage primaryStage, Str
     }
 
     private void loadDataFromCollectionManager() {
-        previousCollection = masterData.stream()
-        .collect(Collectors.toMap(
-        DragonDisplayWrapper::getKey,       
-        DragonDisplayWrapper::getOriginalDragon      
-    ));
         masterData.clear();
         Map<String, Dragon> collection = collectionManager.getCollection();
         for (Map.Entry<String, Dragon> entry : collection.entrySet()) {
