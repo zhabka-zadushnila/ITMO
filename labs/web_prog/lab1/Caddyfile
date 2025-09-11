@@ -1,0 +1,24 @@
+http://localhost:8080 {
+    # Корневая папка для статических файлов
+    root * /home/zhabka/Documents/labs/web_prog/lab1
+
+    # Обслуживание статических файлов
+    file_server
+
+    # Запросы, начинающиеся с /cgi-bin/, перенаправляем на Java FastCGI сервер
+    route /cgi-bin/* {
+        # Переписываем URI для FastCGI.
+        # Это создаст виртуальное имя скрипта (например, index.java),
+        # что позволит FastCGI-транспорту корректно работать.
+        # {path} и {query} сохраняют исходный путь и параметры.
+        rewrite * /index.java{path}?{query}
+
+        reverse_proxy 127.0.0.1:9000 {
+            transport fastcgi {
+                # Указываем Caddy, где разделять путь на SCRIPT_NAME и PATH_INFO.
+                # Всё до ".java" станет SCRIPT_NAME, а всё после — PATH_INFO.
+                split .java
+            }
+        }
+    }
+}
