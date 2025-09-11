@@ -5,7 +5,7 @@ import java.util.AbstractMap;
 import java.util.Map;
 
 import structs.classes.Dragon;
-import structs.wrappers.DragonDisplayWrapper;
+
 
 
 public class Packet implements Serializable {
@@ -60,10 +60,6 @@ public class Packet implements Serializable {
         }
 
     }
-
-    public DragonDisplayWrapper getArgsObjectWrapper() {
-        return (DragonDisplayWrapper) object;
-    };
 
     public String getCommand() {
         return command;

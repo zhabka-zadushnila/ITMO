@@ -8,7 +8,6 @@ import managers.CollectionManager;
 import managers.CommandManager;
 import structs.User;
 import structs.classes.Dragon;
-import structs.wrappers.DragonDisplayWrapper;
 
 /**
  * Used for updating element with specific id
@@ -27,8 +26,7 @@ public class UpdateCommand extends BasicCommand {
         if (user == null) {
             return "please register to do such things";
         }
-
-        DragonDisplayWrapper entry = (DragonDisplayWrapper) arguments;
+        Map.Entry<String, Dragon> entry = (Map.Entry<String, Dragon>) arguments;
 
         if (collectionManager.hasElement(entry.getKey())) {
 

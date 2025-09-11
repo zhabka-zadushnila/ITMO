@@ -17,14 +17,13 @@ import javafx.collections.FXCollections;
  */
 public class CollectionManager {
 
-    private final java.time.LocalDate initTime;
-    Map<String, Dragon> collection = FXCollections.observableHashMap();
     static int MAX_RECONNECT_ATTEMPTS = 5;
     static int RECONNECT_TIMEOUT = 2000; //millis
-    String hostname = "188.242.233.237";
+    private final java.time.LocalDate initTime;
+    Map<String, Dragon> collection = FXCollections.observableHashMap();
+    String hostname = "localhost";
     int port = 52947;
     SocketChannel channel = ConnectionManager.connectToServer(hostname, port, MAX_RECONNECT_ATTEMPTS, RECONNECT_TIMEOUT);
-
 
 
     /**
@@ -129,18 +128,13 @@ public class CollectionManager {
         this.collection = collection;
     }
 
-    public void sync(){
+    public void sync() {
         Packet packet = RequestConstructor.createRequest();
         try {
             RequestResponseTool.sendPacket(channel, packet);
         } catch (IOException ex) {
-            ex.printStackTrace();
         }
         packet = RequestResponseTool.getPacket(channel);
-        if(packet == null){
-            System.out.println("somehow packet in sync is null");
-            return;
-        }
         Map<String, Dragon> updatedCollection = packet.getMap();
         this.collection = updatedCollection;
 

@@ -45,6 +45,7 @@ class Main {
         ClientManager clientManager = new ClientManager(it, "localhost", 52946, commandManager);
 
         AppStarter.main(args);
+        clientManager.run();
 
     /*
         "  - help : вывести справку по доступным командам\n" +

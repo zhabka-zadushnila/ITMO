@@ -8,7 +8,6 @@ import managers.CollectionManager;
 import managers.CommandManager;
 import structs.User;
 import structs.classes.Dragon;
-import structs.wrappers.DragonDisplayWrapper;
 
 
 /**
@@ -31,7 +30,7 @@ public class ReplaceIfLowerCommand extends BasicCommand {
         if (arguments == null) {
             return "Something strange, seems like you've provided null";
         }
-        DragonDisplayWrapper entry = (DragonDisplayWrapper) arguments;
+        Map.Entry<String, Dragon> entry = (Map.Entry<String, Dragon>) arguments;
         Dragon dragon = entry.getValue();
         if (dragon == null) {
             return "";
@@ -43,7 +42,6 @@ public class ReplaceIfLowerCommand extends BasicCommand {
             if (collectionManager.getElement(entry.getKey()).compareTo(dragon) < 0) {
                 if (collectionManager.getDbManager().updateDragon(dragon, entry.getKey(), user.getLogin()).isExpectedBehabiour()) {
                     collectionManager.replaceElement(entry.getKey(), dragon);
-                    return "Successfully replaced an element";
                 }
             } else {
                 return ("New dragon is not less than new one, nothing has changed :)");

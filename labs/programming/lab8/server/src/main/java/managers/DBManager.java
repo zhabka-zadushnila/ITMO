@@ -384,7 +384,6 @@ public class DBManager {
                 String characterStr = resultSet.getString("character");
                 Integer depth = resultSet.getObject("depth", Integer.class);
                 Double treasures = resultSet.getObject("number_of_treasures", Double.class);
-                String login = resultSet.getString("login");
 
                 Color color = Color.valueOf(colorStr);
                 DragonType type = DragonType.valueOf(typeStr);
@@ -396,7 +395,6 @@ public class DBManager {
                         : null;
 
                 Dragon dragon = new Dragon(name, coordinates, age, color, type, character, cave);
-                dragon.setOwnerLogin(login);
 
                 dragonMap.put(id, dragon);
             }

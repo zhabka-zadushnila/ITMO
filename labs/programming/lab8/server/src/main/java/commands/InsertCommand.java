@@ -8,7 +8,6 @@ import managers.CommandManager;
 import structs.SQLAnswer;
 import structs.User;
 import structs.classes.Dragon;
-import structs.wrappers.DragonDisplayWrapper;
 
 /**
  * Command that is used for adding some stuff in collection. Operates with both {@link CommandManager} and {@link CollectionManager}.
@@ -32,7 +31,7 @@ public class InsertCommand extends BasicCommand {
             return "Something strange, seems like you've provided null";
         }
 
-        DragonDisplayWrapper entry = (DragonDisplayWrapper) arguments;
+        Map.Entry<String, Dragon> entry = (Map.Entry<String, Dragon>) arguments;
         Dragon dragon = entry.getValue();
         if (entry.getValue() == null) {
             return "";

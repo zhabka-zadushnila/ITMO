@@ -1,8 +1,5 @@
 package gui.managers;
 
-import java.io.IOException;
-import java.nio.channels.SocketChannel;
-
 import commands.server.LoginCommand;
 import commands.server.RegisterCommand;
 import managers.ConnectionManager;
@@ -11,11 +8,14 @@ import structs.User;
 import utils.RequestConstructor;
 import utils.RequestResponseTool;
 
+import java.io.IOException;
+import java.nio.channels.SocketChannel;
+
 public class AuthManager {
 
     static int MAX_RECONNECT_ATTEMPTS = 5;
     static int RECONNECT_TIMEOUT = 2000; //millis
-    String hostname = "188.242.233.237";
+    String hostname = "localhost";
     int port = 52947;
     SocketChannel channel = ConnectionManager.connectToServer(hostname, port, MAX_RECONNECT_ATTEMPTS, RECONNECT_TIMEOUT);
 
@@ -29,18 +29,6 @@ public class AuthManager {
     }
 
     public boolean login(String login, String password) {
-        if(login == null){
-            return false;
-        }
-        if (login.trim().isBlank()) {
-            return false;
-        }
-        if(password == null){
-            return false;
-        }
-        if (password.trim().isBlank()) {
-            return false;
-        }
         Packet packet = RequestConstructor.createRequest(new LoginCommand(null), null, new User(login, password), null);
         try {
             RequestResponseTool.sendPacket(channel, packet);
@@ -59,18 +47,6 @@ public class AuthManager {
     }
 
     public boolean register(String login, String password) {
-        if(login == null){
-            return false;
-        }
-        if (login.trim().isBlank()) {
-            return false;
-        }
-        if(password == null){
-            return false;
-        }
-        if (password.trim().isBlank()) {
-            return false;
-        }
         SocketChannel channel = ConnectionManager.connectToServer(hostname, port, MAX_RECONNECT_ATTEMPTS, RECONNECT_TIMEOUT);
         Packet packet = RequestConstructor.createRequest(new RegisterCommand(null), null, new User(login, password), null);
         try {

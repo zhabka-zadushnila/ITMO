@@ -1,25 +1,22 @@
 package gui.managers;
 
-import java.io.IOException;
-import java.nio.channels.SocketChannel;
-
-import commands.server.InsertCommand;
-import commands.server.RemoveGreaterKeyCommand;
-import commands.server.RemoveKeyCommand;
-import commands.server.ReplaceIfLowerCommand;
-import commands.server.UpdateCommand;
+import commands.server.*;
 import managers.ConnectionManager;
 import structs.Packet;
 import structs.User;
-import structs.wrappers.DragonDisplayWrapper;
+import structs.classes.Dragon;
 import utils.RequestConstructor;
 import utils.RequestResponseTool;
+
+import java.io.IOException;
+import java.nio.channels.SocketChannel;
+import java.util.Map;
 
 public class CommandsManager {
 
     static int MAX_RECONNECT_ATTEMPTS = 5;
     static int RECONNECT_TIMEOUT = 2000; //millis
-    String hostname = "188.242.233.237";
+    String hostname = "localhost";
     int port = 52947;
     SocketChannel channel = ConnectionManager.connectToServer(hostname, port, MAX_RECONNECT_ATTEMPTS, RECONNECT_TIMEOUT);
 
@@ -32,7 +29,7 @@ public class CommandsManager {
         this.port = port;
     }
 
-    public String insertDragon(DragonDisplayWrapper dragonEntry, User user) {
+    public String insertDragon(Map.Entry<String, Dragon> dragonEntry, User user) {
         Packet packet = RequestConstructor.createRequest(new InsertCommand(null, null), null, dragonEntry, user);
         try {
             RequestResponseTool.sendPacket(channel, packet);
@@ -47,7 +44,7 @@ public class CommandsManager {
         }
     }
 
-    public String updateDragon(DragonDisplayWrapper dragonEntry, User user) {
+    public String updateDragon(Map.Entry<String, Dragon> dragonEntry, User user) {
         Packet packet = RequestConstructor.createRequest(new UpdateCommand(null, null), null, dragonEntry, user);
         try {
             RequestResponseTool.sendPacket(channel, packet);
@@ -62,7 +59,7 @@ public class CommandsManager {
         }
     }
 
-    public String replaceIfLowerDragon(DragonDisplayWrapper dragonEntry, User user) {
+    public String replaceIfLowerDragon(Map.Entry<String, Dragon> dragonEntry, User user) {
         Packet packet = RequestConstructor.createRequest(new ReplaceIfLowerCommand(null, null), null, dragonEntry, user);
         try {
             RequestResponseTool.sendPacket(channel, packet);
