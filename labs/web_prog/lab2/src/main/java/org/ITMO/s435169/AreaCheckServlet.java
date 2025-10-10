@@ -21,6 +21,11 @@ import java.util.Map;
 @WebServlet(name = "areaCheck")
 public class AreaCheckServlet extends HttpServlet {
 
+    private static final String paramRegex = "\\w+=-?\\d+.?\\d*";
+    private static final List<Integer> xValues = List.of(-5,-4,-3,-2,-1,0,1, 2,3);
+    private static final List<Integer> rValues = List.of(1,2,3,4,5);
+    private static final String validationErrorMessage = "Неверный запрос";
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(true);
@@ -50,16 +55,17 @@ public class AreaCheckServlet extends HttpServlet {
 
     public static Map<String, String> parseQuery(String queryString, HttpServletResponse response) throws IOException {
         Map<String, String> params = new HashMap<>();
+        if (queryString == null){
+            return sendError(response);
+        }
         String[] paramsSplit = queryString.split("&");
 
         if (paramsSplit.length != 3){
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Неверный запрос");
-            return null;
+            return sendError(response);
         }
         for (String param : paramsSplit) {
-            if(!(param.matches("\\w+=-?\\d+.?\\d*") && param.length()>2 && param.length()<8)){
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Неверный запрос");
-                return null;
+            if(!(param.matches(paramRegex) && param.length()>2 && param.length()<8)){
+                return sendError(response);
             }
             String[] pair = param.split("=");
 
@@ -68,23 +74,24 @@ public class AreaCheckServlet extends HttpServlet {
             }
         }
         if(!(params.containsKey("x") && params.containsKey("y") && params.containsKey("r") )){
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Неверный запрос");
-            return null;
+            return sendError(response);
         }
-        if (! List.of(-5,-4,-3,-2,-1,0,1, 2,3).contains(Integer.valueOf(params.get("x")))) {// Double.valueOf(params.get("x")) < -5 || Double.valueOf(params.get("x")) > 3){
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Неверный запрос");
-            return null;
+        if (! xValues.contains(Integer.valueOf(params.get("x")))) {// Double.valueOf(params.get("x")) < -5 || Double.valueOf(params.get("x")) > 3){
+            return sendError(response);
         }
         if (Double.parseDouble(params.get("y")) < -3 || Double.parseDouble(params.get("y")) > 5){
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Неверный запрос");
-            return null;
+            return sendError(response);
         }
 
-        if (! List.of(1,2,3,4,5).contains(Integer.valueOf(params.get("r")))){
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Неверный запрос");
-            return null;
+        if (! rValues.contains(Integer.valueOf(params.get("r")))){
+            return sendError(response);
         }
         return params;
+    }
+
+    private static Map<String, String> sendError(HttpServletResponse response) throws IOException {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST, validationErrorMessage);
+        return null;
     }
 
 }

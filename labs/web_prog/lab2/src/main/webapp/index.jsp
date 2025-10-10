@@ -12,7 +12,7 @@
         <div class="main">
             <div class="left-block">
                 <div class="main-block top-name-block">
-                    P3232 Гузалов Тимур
+                    P3232, Гузалов Тимур, Вариант 81
                 </div>
                 <div class="main-block bottom-pick-block">
                     <form id="point-form" method="GET" action="/lab2-v1/api/checkHit">

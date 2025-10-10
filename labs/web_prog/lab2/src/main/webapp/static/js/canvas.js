@@ -1,3 +1,24 @@
+function addCookie(cname, cvalue, exdays) {
+  const d = new Date();
+  d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+  let expires = "expires="+d.toUTCString();
+  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) {
+  let name = cname + "=";
+  let ca = document.cookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
 document.addEventListener('DOMContentLoaded', function() {
     let x = null;
     const canvas = document.getElementById('main-canvas');
@@ -191,15 +212,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
         form.submit();
     
-        console.log("x: " + x + " y: " + y);
+        //console.log("x: " + x + " y: " + y);
       }
 
 
     drawCanvas();
     window.addEventListener('resize', drawCanvas);
     const r_radios = Array.from(document.getElementsByName("r"));
+
+    if(getCookie("r") != ""){
+        r_radios[Number(getCookie("r"))-1].checked = true;
+        drawCanvas();
+    }
     r_radios.forEach((r_radio) => {
         r_radio.addEventListener("change", function() {
+            addCookie("r", r_radio.value, 1);
             drawCanvas();
             
         });

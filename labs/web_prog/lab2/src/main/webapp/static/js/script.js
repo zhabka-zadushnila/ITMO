@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("point-form");
     const checkboxes = Array.from(document.getElementsByName("r"));
@@ -7,7 +8,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const radiusError = document.getElementById("r-error");
     const responseError = document.getElementById("response-error");
     const table = document.getElementById("results-table-body");
-  
+
+
+
+
     form.addEventListener("submit", (event) => {
       event.preventDefault();
       var formCorrect = true;

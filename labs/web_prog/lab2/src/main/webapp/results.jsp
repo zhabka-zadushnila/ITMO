@@ -7,11 +7,11 @@
     <style>
                 @font-face {
                     font-family: "Minecraft 1.1";
-                    src: url("/static/fonts/mc_font.ttf");
+                    src: url("static/fonts/mc_font.ttf");
                 }
                 @font-face {
                     font-family: "Alagard";
-                    src: url("/static/fonts/alagard.ttf");
+                    src: url("static/fonts/alagard.ttf");
                 }
                 body {
                     font-family: "Minecraft 1.1";
