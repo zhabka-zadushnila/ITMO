@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Лаба лабочка лабубу моя</title>
+    <h:outputStylesheet name="css/style.css" library="static"/>
+    <h:outputScript name="js/timer.js" library="static"/>
+</h:head>
+<h:body>
+    <div class="cat-walking" id="cat"><h:link outcome="to-main"><h:graphicImage name="images/cat_walking.gif" library="static"/></h:link></div>
+
+    <div class="card-container">
+        <div class="card">
+            <div class="card-face card-front">
+                <h:graphicImage name="images/card_back.jpg" library="static" alt="Рубашка карты"/>
+            </div>
+            <div class="card-face card-back">
+                <div class="card-blank">
+                    <div class="card-center-text">
+                        <div class="symbol top-left">&#9824;</div>
+                        <div class="card-text">Гузалов</div>
+                        <div class="card-text">Тимур</div>
+                        <div class="card-text">Павлович</div>
+                        <div class="symbol bottom-right">&#9824;</div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-container">
+        <div class="card">
+            <div class="card-face card-front">
+                <h:graphicImage name="images/card_back.jpg" library="static" alt="Рубашка карты"/>
+            </div>
+            <div class="card-face card-back">
+                <div class="card-blank">
+                    <div class="card-center-text">
+
+                        <div class="symbol top-left red">&#9829;</div>
+                        <div class="card-text red">P3232</div>
+                        <div class="symbol bottom-right red">&#9829;</div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-container">
+        <div class="card">
+            <div class="card-face card-front">
+                <h:graphicImage name="images/card_back.jpg" library="static" alt="Рубашка карты"/>
+            </div>
+            <div class="card-face card-back">
+                <div class="card-blank">
+                    <div class="card-center-text">
+                        <div class="symbol top-left">&clubs;</div>
+                        <div class="card-text">Вариант</div>
+                        <div class="card-text">434343</div>
+                        <div class="symbol bottom-right">&clubs;</div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-container">
+        <div class="card">
+            <div class="card-face card-front">
+                <h:graphicImage name="images/card_back.jpg" library="static" alt="Рубашка карты"/>
+            </div>
+            <div class="card-face card-back">
+                <div class="card-blank">
+                    <div class="card-center-text">
+                        <div class="symbol top-left red">&diams;</div>
+                        <div class="card-text red">Время</div>
+                        <div class="card-text red" id="timer">00:00:00</div>
+                        <div class="card-text red">Терпим ещё:</div>
+                        <div class="card-text red" id="back-timer">8</div>
+                        <div class="symbol bottom-right red">&diams;</div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</h:body>
+</html>

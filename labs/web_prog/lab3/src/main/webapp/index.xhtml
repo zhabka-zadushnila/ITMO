@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <title>Основная страница</title>
+    <h:outputStylesheet name="css/style2.css" library="static"/>
+    <h:outputScript name="js/cat.js" library="static"/>
+    <h:outputScript name="js/canvas.js" library="static"/>
+</h:head>
+
+<h:body>
+    <div class="cat-walking" id="cat"><h:link outcome="to-start"><h:graphicImage name="images/cat_walking.gif" library="static"/></h:link></div>
+
+    <div class="main">
+        <div class="left-block">
+            <div class="main-block top-name-block">
+                Здесь могла бы быть ваша реклама
+            </div>
+
+            <div class="main-block bottom-pick-block">
+                <h:form     >
+                    <h:panelGrid columns="1" style="margin-bottom: 10px">
+                        <h:outputText id="x-output" value="X последний раз был #{hitsManagerBean.hit.x}"/>
+                        <h:inputHidden id="x" value="#{hitsManagerBean.hit.x}"/>
+                        <p:slider for="x" display="x-output" style="width: 200px" minValue="-5" maxValue="5" required="true" displayTemplate="X ныне: {value}"/>
+                    </h:panelGrid>
+
+                        <h:panelGrid columns="1" style="margin-bottom: 10px">
+                            <p:outputLabel for="y" value="Введите Y:"/>
+                            <p:inputNumber id="y" value="#{hitsManagerBean.hit.y}" minValue="-5"
+                                           maxValue="5" required="true" modifyValueOnWheel="false" widgetVar="yInputWidget" />
+
+                        </h:panelGrid>
+                    <h:panelGrid columns="1" style="margin-bottom: 10px">
+                    <h5>Выберите R:</h5>
+                    <h:selectOneRadio id="r-selector" value = "#{hitsManagerBean.hit.r}" required="true" onchange="drawCanvas()">
+                        <f:selectItem itemValue = "1" itemLabel = "1" />
+                        <f:selectItem itemValue = "1.5" itemLabel = "1.5" />
+                        <f:selectItem itemValue = "2" itemLabel = "2" />
+                        <f:selectItem itemValue = "2.5" itemLabel = "2.5" />
+                        <f:selectItem itemValue = "3" itemLabel = "3" />
+                    </h:selectOneRadio>
+                    <p:commandButton value="Submit"
+                                     action="#{hitsManagerBean.addHit}"
+                                     update=":dots-table :script-container"
+                                     process="@form"
+                                     oncomplete="drawCanvas()"/>
+                    <p:remoteCommand name="sendCanvasClick"
+                                     action="#{hitsManagerBean.addHit}"
+                                     update=":dots-table :script-container"
+                                     process="@form"
+                                     oncomplete="drawCanvas()"/>
+                    </h:panelGrid>
+
+                </h:form>
+            </div>
+
+            <div class="main-block bottom-list-block">
+                <p:dataTable id="dots-table" var="hit" value="#{hitsManagerBean.getSortedHits()}" paginator="true" rows="5">
+                    <p:column headerText="id">
+                        <h:outputText value="#{hit.id}" />
+                    </p:column>
+
+                    <p:column headerText="X">
+                        <h:outputText value="#{hit.x}" />
+                    </p:column>
+
+                    <p:column headerText="Y">
+                        <h:outputText value="#{hit.y}" />
+                    </p:column>
+
+                    <p:column headerText="R">
+                        <h:outputText value="#{hit.r}" />
+                    </p:column>
+
+                    <p:column headerText="Hit?">
+                        <h:outputText value="#{hit.hitText}" />
+                    </p:column>
+                </p:dataTable>
+            </div>
+        </div>
+        <div class="main-block right-block">
+            <canvas id="main-canvas"></canvas>
+        </div>
+    </div>
+    <h:panelGroup id="script-container" layout="block">
+        <script type="text/javascript">
+            var allHits = JSON.parse('#{hitsManagerBean.hitsAsJson}');
+        </script>
+    </h:panelGroup>
+
+</h:body>
+</html>
